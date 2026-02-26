@@ -23,19 +23,16 @@ except FileNotFoundError:
     sys.exit()
 
 # 3. Define the "Start Button" Hitbox
-# Based on your image, the button is roughly in the center-bottom.
-# Let's define an invisible rectangle over that area to detect clicks.
-# (Adjust these numbers if the button area feels off)
 button_width = 200
 button_height = 80
 button_x = (SCREEN_WIDTH // 2) - (button_width // 2)
 button_y = (SCREEN_HEIGHT // 2) + 50  # Slightly below center
 start_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
 
-# 4. Setup Game World (But don't run it yet)
+# 4. Setup Game World
 road = Road()
 spawner = Spawner()
-player = Pedestrian(CHARACTERS["Badrul"])
+player = Pedestrian(CHARACTERS["Badrul"]) # Using Badrul
 
 # Game States
 GAME_STATE = "WAITING"  # Options: WAITING, RUNNING, GAME_OVER
@@ -68,12 +65,22 @@ while running:
             print("YOU SURVIVED! Reached the footpath.")
             player.rect.y = SCREEN_HEIGHT - 60
             player.rect.x = SCREEN_WIDTH // 2
+            # CRITICAL: Kill momentum on win
+            player.vel_y = 0
+            player.vel_x = 0
 
         # Check Collision
         for v in spawner.vehicles:
             if player.rect.colliderect(v.rect):
                 print(f"COLLISION! {player.name} hit by traffic!")
+                
+                # Reset position
                 player.rect.y = SCREEN_HEIGHT - 60
+                player.rect.x = SCREEN_WIDTH // 2
+                
+                # CRITICAL: Kill momentum on hit
+                player.vel_y = 0
+                player.vel_x = 0
 
     # --- Drawing ---
     screen.fill(COLOR_BG)
