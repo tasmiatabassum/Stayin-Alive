@@ -32,7 +32,7 @@ start_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
 # 4. Setup Game World
 road = Road()
 spawner = Spawner()
-player = Pedestrian(CHARACTERS["Badrul"]) # Using Badrul
+player = Pedestrian(CHARACTERS["Mrittika"]) # Using Badrul
 
 # Game States
 GAME_STATE = "WAITING"  # Options: WAITING, RUNNING, GAME_OVER
@@ -63,24 +63,13 @@ while running:
         # Check Win Condition
         if player.rect.y < FAR_LANE_Y:
             print("YOU SURVIVED! Reached the footpath.")
-            player.rect.y = SCREEN_HEIGHT - 60
-            player.rect.x = SCREEN_WIDTH // 2
-            # CRITICAL: Kill momentum on win
-            player.vel_y = 0
-            player.vel_x = 0
+            player.reset_position()
 
         # Check Collision
         for v in spawner.vehicles:
             if player.rect.colliderect(v.rect):
                 print(f"COLLISION! {player.name} hit by traffic!")
-                
-                # Reset position
-                player.rect.y = SCREEN_HEIGHT - 60
-                player.rect.x = SCREEN_WIDTH // 2
-                
-                # CRITICAL: Kill momentum on hit
-                player.vel_y = 0
-                player.vel_x = 0
+                player.reset_position()  # <--- Replaces 4 lines of code!
 
     # --- Drawing ---
     screen.fill(COLOR_BG)
