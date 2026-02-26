@@ -10,7 +10,7 @@ from characters import CHARACTERS
 # 1. Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Project: Stayin' Alive (Boardbazar)")
+pygame.display.set_caption("Stayin' Alive (Boardbazar)")
 clock = pygame.time.Clock()
 
 # 2. Load Assets
