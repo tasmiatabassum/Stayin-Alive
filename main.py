@@ -6,6 +6,7 @@ from road import Road
 from pedestrian import Pedestrian
 from spawner import Spawner
 from characters import CHARACTERS
+from round_manager import RoundManager
 
 # 1. Initialize Pygame
 pygame.init()
@@ -13,8 +14,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Stayin' Alive (Boardbazar)")
 clock = pygame.time.Clock()
 
-# --- NEW: Font updated to Inter Bold 36 ---
-# Note: If "Inter" isn't installed on your PC, Pygame will use a default sans-serif font.
+# --- Font updated to Gothic 25 ---
 font_lore = pygame.font.SysFont("Gothic", 25)
 
 # 2. Load Assets
@@ -22,34 +22,40 @@ try:
     start_bg = pygame.image.load("start.jpg")
     start_bg = pygame.transform.scale(start_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 except FileNotFoundError:
-    print("Error: start.jpg not found. Please put the image in the project folder.")
+    print("Error: start.jpg not found.")
     sys.exit()
 
 try:
     selection_bg = pygame.image.load("selection.jpg")
     selection_bg = pygame.transform.scale(selection_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 except FileNotFoundError:
-    print("Error: selection.jpg not found. Please put the image in the project folder.")
+    print("Error: selection.jpg not found.")
     sys.exit()
 
-# 3. Define Hitboxes (Invisible Clickable Areas)
+# 3. Define Hitboxes
+
+# A. Start Screen
 start_button_rect = pygame.Rect((SCREEN_WIDTH // 2) - 100, (SCREEN_HEIGHT // 2) + 50, 200, 80)
 
+# B. Character Selection
 btn_w = 200
 btn_h = 70
-btn_y = (SCREEN_HEIGHT // 2) + 160  
+btn_y = (SCREEN_HEIGHT // 2) + 130
+badrul_btn_rect   = pygame.Rect((SCREEN_WIDTH // 2) - btn_w - 20, btn_y, btn_w, btn_h)
+mrittika_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) + 20,         btn_y, btn_w, btn_h)
 
-badrul_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) - btn_w - 20, btn_y, btn_w, btn_h)
-mrittika_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) + 20, btn_y, btn_w, btn_h)
+# 4. Setup Game World (single, clean initialization)
+round_manager = RoundManager()
+road    = Road()
+spawner = Spawner(round_manager)
+player  = None
 
-# 4. Setup Game World
-road = Road()
-spawner = Spawner() 
-player = None 
+# 5. Game State
+# Flow: START -> SELECT -> RUNNING
+GAME_STATE = "START"
 
-GAME_STATE = "START" 
 
-#  Text Wrapping Helper Function ---
+# Text Wrapping Helper Function ---
 def draw_text_wrapped(surface, text, color, rect, font):
     lines = []
     
@@ -108,6 +114,7 @@ def draw_lore_card(screen, char_key):
 
 running = True
 while running:
+
     # --- Input Handling ---
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -115,7 +122,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
-            
+
             if GAME_STATE == "START":
                 if start_button_rect.collidepoint(mouse_pos):
                     print("Moving to Character Selection...")
@@ -126,7 +133,7 @@ while running:
                     print("Badrul Selected! Game Starting.")
                     player = Pedestrian(CHARACTERS["Badrul"])
                     GAME_STATE = "RUNNING"
-                    
+
                 elif mrittika_btn_rect.collidepoint(mouse_pos):
                     print("Mrittika Selected! Game Starting.")
                     player = Pedestrian(CHARACTERS["Mrittika"])
@@ -140,12 +147,14 @@ while running:
 
         if player.rect.y < FAR_LANE_Y:
             print("YOU SURVIVED! Reached the footpath.")
+            round_manager.record_win()
             player.reset_position()
             spawner.vehicles.clear()
 
         for v in spawner.vehicles:
             if player.rect.colliderect(v.rect):
                 print(f"COLLISION! {player.name} hit by traffic!")
+                round_manager.record_loss()
                 player.reset_position()
                 spawner.vehicles.clear()
 
@@ -170,6 +179,14 @@ while running:
         road.draw(screen)
         spawner.draw(screen)
         player.draw(screen)
+
+        # HUD: Round info top-left
+        font = pygame.font.SysFont("Arial", 22, bold=True)
+        hud = font.render(
+            f"Round: {round_manager.current_round}  |  W: {round_manager.wins}  L: {round_manager.losses}",
+            True, (255, 255, 255)
+        )
+        screen.blit(hud, (10, 10))
 
     pygame.display.flip()
     clock.tick(FPS)
