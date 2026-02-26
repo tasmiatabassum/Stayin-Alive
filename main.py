@@ -257,9 +257,9 @@ while running:
             f"> Subject Profile.......... {player.name.upper()}",
             f"> Total Time Elapsed....... {m:02d}:{s:02d}",
             f"> Kinetic Dashes Used...... {total_dashes_used}",
-            f"> Total Rounds Played.... {total_attempts}",
-            f"> Wins..... {round_manager.wins}",
-            f"> Losses...... {round_manager.losses}",
+            f"> Total Rounds Played...... {total_attempts}",
+            f"> Wins..................... {round_manager.wins}",
+            f"> Losses................... {round_manager.losses}",
             f"> Projected Survival Rate.. {survival_rate:.1f}%"
         ]
         
