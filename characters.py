@@ -6,9 +6,11 @@ CHARACTERS = {
         "max_speed": 7.0,          # Very fast top speed
         "dash_power": 18.0,        # Massive leap
         "dash_cooldown": 120,      
-        "color": (0, 255, 127),
+        "color": (185, 233, 1),
         "width": 30,
-        "height": 30
+        "height": 30,
+        "bio": "Badrul relies on momentum. He rarely looks both ways.",
+        "tagline": "Yielding is for the weak."
     },
     "Mrittika": {
         "name": "Mrittika",
@@ -17,8 +19,10 @@ CHARACTERS = {
         "max_speed": 3.5,          # Hard capped at a slower walking speed
         "dash_power": 9.0,         
         "dash_cooldown": 40,       
-        "color": (255, 105, 180),
+        "color": (252, 158, 232),
         "width": 26,               
-        "height": 26
+        "height": 26,
+        "bio": "Mrittika calculates the gap. Very nimble, but lacks top speed.",
+        "tagline": "Patience is a virtue (until the bus honks)."
     }
 }
