@@ -6,6 +6,7 @@ from road import Road
 from pedestrian import Pedestrian
 from spawner import Spawner
 from characters import CHARACTERS
+from round_manager import RoundManager
 
 # 1. Initialize Pygame
 pygame.init()
@@ -16,75 +17,62 @@ clock = pygame.time.Clock()
 # 2. Load Assets
 try:
     start_bg = pygame.image.load("start.jpg")
-    # Scale it to fit the window perfectly
     start_bg = pygame.transform.scale(start_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 except FileNotFoundError:
-    print("Error: start.jpg not found. Please put the image in the project folder.")
+    print("Error: start.jpg not found.")
     sys.exit()
 
-
 try:
-    # Load your new character selection image
     selection_bg = pygame.image.load("selection.jpg")
     selection_bg = pygame.transform.scale(selection_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 except FileNotFoundError:
-    print("Error: selection.jpg not found. Please put the image in the project folder.")
+    print("Error: selection.jpg not found.")
     sys.exit()
 
-# 3. Define Hitboxes (Invisible Clickable Areas)
+# 3. Define Hitboxes
 
-# A. Start Screen Hitbox (Adjusted for typical center placement)
+# A. Start Screen
 start_button_rect = pygame.Rect((SCREEN_WIDTH // 2) - 100, (SCREEN_HEIGHT // 2) + 50, 200, 80)
 
-# B. Character Selection Hitboxes 
-# Based on the image provided, the buttons are side-by-side in the lower half.
+# B. Character Selection
 btn_w = 200
 btn_h = 70
-btn_y = (SCREEN_HEIGHT // 2) + 130  # Adjust this if the hitboxes don't line up vertically!
+btn_y = (SCREEN_HEIGHT // 2) + 130
+badrul_btn_rect   = pygame.Rect((SCREEN_WIDTH // 2) - btn_w - 20, btn_y, btn_w, btn_h)
+mrittika_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) + 20,         btn_y, btn_w, btn_h)
 
-badrul_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) - btn_w - 20, btn_y, btn_w, btn_h)
-mrittika_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) + 20, btn_y, btn_w, btn_h)
+# 4. Setup Game World (single, clean initialization)
+round_manager = RoundManager()
+road    = Road()
+spawner = Spawner(round_manager)
+player  = None
 
-# 4. Define the "Start Button" Hitbox
-button_width = 200
-button_height = 80
-button_x = (SCREEN_WIDTH // 2) - (button_width // 2)
-button_y = (SCREEN_HEIGHT // 2) + 50  # Slightly below center
-start_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
-
-# 5. Setup Game World
-road = Road()
-spawner = Spawner() 
-player = None 
-
-# --- New Multi-Step Game States ---
+# 5. Game State
 # Flow: START -> SELECT -> RUNNING
-GAME_STATE = "START"  
+GAME_STATE = "START"
 
 running = True
 while running:
+
     # --- Input Handling ---
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-        # Check for Mouse Clicks
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
-            
-            # State 1: On the Start Screen
+
             if GAME_STATE == "START":
                 if start_button_rect.collidepoint(mouse_pos):
                     print("Moving to Character Selection...")
                     GAME_STATE = "SELECT"
-            
-            # State 2: On the Selection Screen
+
             elif GAME_STATE == "SELECT":
                 if badrul_btn_rect.collidepoint(mouse_pos):
                     print("Badrul Selected! Game Starting.")
                     player = Pedestrian(CHARACTERS["Badrul"])
                     GAME_STATE = "RUNNING"
-                    
+
                 elif mrittika_btn_rect.collidepoint(mouse_pos):
                     print("Mrittika Selected! Game Starting.")
                     player = Pedestrian(CHARACTERS["Mrittika"])
@@ -99,6 +87,7 @@ while running:
         # Check Win Condition
         if player.rect.y < FAR_LANE_Y:
             print("YOU SURVIVED! Reached the footpath.")
+            round_manager.record_win()
             player.reset_position()
             spawner.vehicles.clear()
 
@@ -106,6 +95,7 @@ while running:
         for v in spawner.vehicles:
             if player.rect.colliderect(v.rect):
                 print(f"COLLISION! {player.name} hit by traffic!")
+                round_manager.record_loss()
                 player.reset_position()
                 spawner.vehicles.clear()
 
@@ -114,19 +104,25 @@ while running:
 
     if GAME_STATE == "START":
         screen.blit(start_bg, (0, 0))
-        # Debug: Uncomment this line to see the invisible start button hitbox
-        # pygame.draw.rect(screen, (255, 0, 0), start_button_rect, 2)
+        # pygame.draw.rect(screen, (255, 0, 0), start_button_rect, 2)  # Debug
 
     elif GAME_STATE == "SELECT":
         screen.blit(selection_bg, (0, 0))
-        # Debug: Uncomment these lines to align the hitboxes perfectly with your image!
-        # pygame.draw.rect(screen, (0, 255, 0), badrul_btn_rect, 2)
-        # pygame.draw.rect(screen, (255, 0, 255), mrittika_btn_rect, 2)
+        # pygame.draw.rect(screen, (0, 255, 0), badrul_btn_rect, 2)    # Debug
+        # pygame.draw.rect(screen, (255, 0, 255), mrittika_btn_rect, 2) # Debug
 
     elif GAME_STATE == "RUNNING" and player is not None:
         road.draw(screen)
         spawner.draw(screen)
         player.draw(screen)
+
+        # HUD: Round info top-left
+        font = pygame.font.SysFont("Arial", 22, bold=True)
+        hud = font.render(
+            f"Round: {round_manager.current_round}  |  W: {round_manager.wins}  L: {round_manager.losses}",
+            True, (255, 255, 255)
+        )
+        screen.blit(hud, (10, 10))
 
     pygame.display.flip()
     clock.tick(FPS)
