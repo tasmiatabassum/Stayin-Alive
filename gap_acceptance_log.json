@@ -1,0 +1,176 @@
+[
+  {
+    "session_time": "2026-02-27T12:04:46.823635",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 88,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.345,
+        "accepted": true
+      },
+      {
+        "frame": 108,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 207,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.649,
+        "accepted": true
+      },
+      {
+        "frame": 217,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 276,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 396,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.016,
+        "accepted": true
+      },
+      {
+        "frame": 408,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.844,
+        "accepted": true
+      },
+      {
+        "frame": 427,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 518,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.943,
+        "accepted": true
+      },
+      {
+        "frame": 539,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.191,
+        "accepted": true
+      },
+      {
+        "frame": 560,
+        "round": 5,
+        "from_zone": "far",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 781,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.615,
+        "accepted": true
+      },
+      {
+        "frame": 862,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 6.135,
+        "accepted": true
+      },
+      {
+        "frame": 884,
+        "round": 6,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 8,
+      "mean_gap_s": 1.342,
+      "std_gap_s": 1.831,
+      "min_gap_s": 0.191,
+      "max_gap_s": 6.135,
+      "lognormal_mu": -0.2546,
+      "lognormal_sigma": 0.9421
+    }
+  },
+  {
+    "session_time": "2026-02-27T12:05:18.128226",
+    "character": "Mrittika",
+    "events": [
+      {
+        "frame": 377,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 3.524,
+        "accepted": true
+      },
+      {
+        "frame": 661,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1400,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.248,
+        "accepted": true
+      },
+      {
+        "frame": 1467,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 2,
+      "mean_gap_s": 1.886,
+      "std_gap_s": 1.638,
+      "min_gap_s": 0.248,
+      "max_gap_s": 3.524,
+      "lognormal_mu": -0.0674,
+      "lognormal_sigma": 1.327
+    }
+  }
+]

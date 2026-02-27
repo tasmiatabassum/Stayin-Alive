@@ -1,4 +1,28 @@
 # round_manager.py
+"""
+RoundManager — Stochastic Traffic Parameter Controller
+=======================================================
+Controls three probability models that govern traffic behaviour:
+
+  1. Truncated-Normal speed distributions — now lane-dependent
+     ─────────────────────────────────────────────────────────
+     Each lane has its own (mean, std) pair reflecting real-world
+     characteristics:
+       Near  lane  : residential / slow  → low mean, tight σ
+       Middle lane : chaotic urban mix   → bimodal (slow trucks + fast bikes)
+       Far   lane  : highway-style flow  → high mean, moderate σ
+
+  2. Bernoulli lane activation probabilities
+     ────────────────────────────────────────
+     get_lane_activation_probs() returns [p_near, p_middle, p_far].
+     Spawner flips an independent Bernoulli coin per lane per arrival
+     event.  Probabilities scale upward with round number to simulate
+     congestion onset.
+
+  3. All existing models (weighted categorical vehicle type, shrinking
+     headway gap, Poisson mean arrival rate) are preserved unchanged.
+"""
+
 import json
 import os
 import random
@@ -38,14 +62,15 @@ def weighted_choice(options, weights):
 def truncated_normal_speed(mean, std, lo, hi):
     """
     Sample from a normal distribution, rejecting values outside [lo, hi].
-    Models realistic speed variance — most vehicles cluster near mean,
-    occasional fast/slow outliers exist but can't exceed physical limits.
+    Models realistic speed variance — most vehicles cluster near the mean,
+    occasional fast/slow outliers exist but cannot exceed physical limits.
+    Up to 20 rejection attempts; falls back to clamped mean on failure.
     """
-    for _ in range(20):          # max rejection attempts
+    for _ in range(20):
         v = random.gauss(mean, std)
         if lo <= v <= hi:
             return v
-    return max(lo, min(hi, mean))  # fallback: clamp
+    return max(lo, min(hi, mean))
 
 
 class RoundManager:
@@ -84,17 +109,27 @@ class RoundManager:
         self._update_score(-3)
         print(f"--- ROUND {self.current_round} | SCORE {self.score} (loss) ---")
 
-    # ── Spawn timing ─────────────────────────────────────────────────────
-    def get_spawn_frequency(self):
-        return max(self.min_spawn_rate,
-                   self.base_spawn_rate - (self.current_round * 3))
-
-    # ── Speed (truncated normal) ─────────────────────────────────────────
-    def get_speed_sample(self, vtype):
+    # ── Spawn timing (mean of the Poisson process) ───────────────────────
+    def get_spawn_frequency(self) -> float:
         """
-        Returns a speed magnitude (always positive).
-        Mean and std scale with round number.
-        Each vehicle type has its own base range.
+        Mean inter-arrival time in frames.
+        Used by Spawner as E[T] = 1/λ for the Exponential distribution.
+        """
+        return float(max(self.min_spawn_rate,
+                         self.base_spawn_rate - (self.current_round * 3)))
+
+    # ── Lane-dependent speed (truncated normal) ──────────────────────────
+    def get_speed_sample(self, vtype: str, lane: int = None) -> float:
+        """
+        Sample a vehicle speed from a truncated-normal distribution whose
+        parameters depend on BOTH vehicle type AND lane:
+
+          Lane 3 (near)   → residential character; low mean, tight σ
+          Lane 2 (middle) → chaotic urban mix; bimodal approximated by
+                            randomly selecting a low or high cluster
+          Lane 1 (far)    → highway-style; high mean, moderate σ
+
+        Mean and hi-bound shift upward each round (round_boost).
         """
         base_ranges = {
             "car":        (3.0, 6.0),
@@ -102,20 +137,51 @@ class RoundManager:
             "bus":        (2.0, 4.0),
             "truck":      (2.0, 4.0),
         }
-        lo, hi = base_ranges.get(vtype, (3.0, 6.0))
-        # Mean shifts upward each round, std widens slightly
+        lo, hi      = base_ranges.get(vtype, (3.0, 6.0))
         round_boost = (self.current_round - 1) * 0.25
-        mean = (lo + hi) / 2 + round_boost
-        std  = 0.8 + (self.current_round - 1) * 0.05
+
+        if lane == 3:      # ── Near lane: slow residential ───────────────
+            mean = lo + (hi - lo) * 0.30 + round_boost * 0.60
+            std  = 0.50 + (self.current_round - 1) * 0.03
+
+        elif lane == 1:    # ── Far lane: highway-style ───────────────────
+            mean = lo + (hi - lo) * 0.75 + round_boost
+            std  = 0.90 + (self.current_round - 1) * 0.06
+
+        else:              # ── Middle lane: chaotic bimodal ──────────────
+            # Bimodal: 50 % from a slow cluster, 50 % from a fast cluster.
+            # This approximates a mixture of heavy vehicles and motorcycles.
+            if random.random() < 0.5:
+                mean = lo + (hi - lo) * 0.25 + round_boost * 0.70   # slow peak
+            else:
+                mean = lo + (hi - lo) * 0.75 + round_boost           # fast peak
+            std = 1.20 + (self.current_round - 1) * 0.07
+
         new_hi = hi + round_boost
         return truncated_normal_speed(mean, std, lo, new_hi)
 
+    # ── Bernoulli lane activation probabilities ──────────────────────────
+    def get_lane_activation_probs(self) -> list[float]:
+        """
+        Returns [p_near, p_middle, p_far].
+
+        Each value is the independent Bernoulli probability that a given
+        lane will spawn a vehicle at the current arrival event.
+
+        Round 1 : near lane is reliably active; middle and far are rare.
+        Round 8+: all three lanes are almost always active — full chaos.
+        """
+        r = self.current_round
+        p_near   = min(0.90, 0.50 + r * 0.05)
+        p_middle = min(0.80, 0.15 + r * 0.08)
+        p_far    = min(0.75, 0.10 + r * 0.07)
+        return [p_near, p_middle, p_far]
+
     # ── Vehicle type weights (weighted categorical) ───────────────────────
-    def get_vehicle_weights(self):
+    def get_vehicle_weights(self) -> dict:
         """
         Round 1 : mostly cars, rare heavy vehicles.
         Round 5+: buses/trucks common, motorcycles swarm.
-        Returns dict {vtype: weight}
         """
         r = self.current_round
         return {
@@ -125,43 +191,34 @@ class RoundManager:
             "truck":      min(4.0, r * 0.3),
         }
 
-    # ── Lane weights (weighted categorical) ──────────────────────────────
-    def get_lane_weights(self):
-        """
-        Round 1 : near lane dominates (player starts near it).
-        Round 5+: all three lanes equally dangerous.
-        Returns [near_w, middle_w, far_w]
-        """
+    # ── Lane weights (kept for legacy callers; Bernoulli model is primary) ─
+    def get_lane_weights(self) -> list[float]:
         r = self.current_round
-        near_w   = max(1.0, 6.0 - r * 0.4)
-        middle_w = min(5.0, 0.5 + r * 0.5)
-        far_w    = min(5.0, 0.5 + r * 0.4)
-        return [near_w, middle_w, far_w]
+        return [
+            max(1.0, 6.0 - r * 0.4),   # near
+            min(5.0, 0.5 + r * 0.5),   # middle
+            min(5.0, 0.5 + r * 0.4),   # far
+        ]
 
-    # ── Spawn gap (headway model) ─────────────────────────────────────────
-    def get_spawn_gap(self):
+    # ── Dynamic headway gap ──────────────────────────────────────────────
+    def get_spawn_gap(self) -> int:
         """
-        Minimum pixel gap between spawned vehicles decreases each round,
-        simulating higher traffic intensity (Poisson-style headway reduction).
-        Floor at 70px so vehicles don't overlap on spawn.
+        Minimum pixel gap between spawned vehicles.  Decreases each round
+        to simulate higher traffic intensity (Poisson-style headway reduction).
+        Floored at 70 px so vehicles do not overlap on spawn.
         """
         return max(70, 150 - self.current_round * 8)
 
     # ── Middle lane chaos probability ────────────────────────────────────
-    def get_middle_bidirectional_prob(self):
-        """
-        Probability that middle lane spawns traffic in BOTH directions
-        (as opposed to a single dominant direction).
-        Increases each round.
-        """
+    def get_middle_bidirectional_prob(self) -> float:
         return min(0.9, 0.2 + self.current_round * 0.07)
 
-    # ── Speed multiplier (kept for vehicle.update compatibility) ─────────
-    def get_traffic_speed_multiplier(self):
+    # ── Speed multiplier (vehicle.update compatibility) ──────────────────
+    def get_traffic_speed_multiplier(self) -> float:
         return 1.0 + (self.current_round * 0.05)
 
-    # ── Human-readable summary for HUD/debug ─────────────────────────────
-    def get_difficulty_label(self):
+    # ── Difficulty label ─────────────────────────────────────────────────
+    def get_difficulty_label(self) -> str:
         r = self.current_round
         if r <= 2:  return "EASY"
         if r <= 4:  return "MEDIUM"

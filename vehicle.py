@@ -24,6 +24,18 @@ COLORS_RIGHT = {
     "truck":      [(40, 100, 170), (30, 75, 150)],
 }
 
+# ── NaSch parameters ────────────────────────────────────────────────────
+# p_slow: probability of spontaneous deceleration each step.
+# This is the "randomisation" term that produces phantom traffic jams.
+# Values from literature: 0.1–0.3 (Nagel & Schreckenberg 1992).
+NASCH_P_SLOW = {
+    "car":        0.10,
+    "motorcycle": 0.08,   # bikes react faster, fewer phantom jams
+    "bus":        0.15,   # buses are erratic
+    "truck":      0.18,   # trucks are the worst offenders
+}
+NASCH_ACCEL = 0.35        # px/frame² — acceleration per step
+
 
 class Vehicle:
     def __init__(self, lane_y, direction_left=True, sub_lane=0,
@@ -32,7 +44,6 @@ class Vehicle:
         self.direction_left = direction_left
         self.sub_lane       = sub_lane
 
-        # vtype comes from spawner's weighted categorical draw
         self.vtype = vtype if vtype else "car"
         vdata = VEHICLE_TYPES[self.vtype]
         self.w = vdata["width"]
@@ -42,8 +53,6 @@ class Vehicle:
         y_center_offset = (50 - self.h) // 2
         self.rect = pygame.Rect(0, lane_y + y_offset + y_center_offset, self.w, self.h)
 
-        # Speed: use truncated-normal sample from round_manager if provided,
-        # else fall back to uniform randint (shouldn't happen in normal gameplay)
         if speed_override is not None:
             raw_speed = speed_override
         else:
@@ -65,16 +74,81 @@ class Vehicle:
         self.current_speed   = self.base_speed
         self.switch_cooldown = 0
 
+        # NaSch stochastic parameter for this vehicle instance
+        self.p_slow = NASCH_P_SLOW.get(self.vtype, 0.10)
+
     # ── Update ──────────────────────────────────────────────────────────
-    def update(self, all_vehicles, speed_multiplier=1.0):
-        self.current_speed   = self.base_speed * speed_multiplier
+    def update(self, all_vehicles, speed_multiplier: float = 1.0):
         self.switch_cooldown = max(0, self.switch_cooldown - 1)
+
+        # Head-on evasion only needed in the chaotic middle lane
         if self.lane_y == MIDDLE_LANE_Y:
             self.check_head_on(all_vehicles)
-        self.maintain_distance(all_vehicles)
-        self.rect.x += int(self.current_speed)
 
-    # ── AI ───────────────────────────────────────────────────────────────
+        # Nagel-Schreckenberg 4-step rule replaces the old maintain_distance()
+        self._nasch_step(all_vehicles, speed_multiplier)
+
+    # ── Nagel-Schreckenberg Cellular Automaton ───────────────────────────
+    def _nasch_step(self, all_vehicles, speed_multiplier: float) -> None:
+        """
+        Four-step NaSch update (Nagel & Schreckenberg 1992):
+
+          1. Accelerate  : v ← min(v + a,  v_max)
+          2. Brake       : v ← min(v,  gap / look_ahead)     [collision avoidance]
+          3. Randomise   : v ← max(v - a,  0)  with prob p_slow  [phantom jams]
+          4. Move        : x ← x + v
+
+        All quantities in pixels/frame so no unit conversion is needed.
+        The 'look_ahead' divisor converts pixel distance → speed headroom.
+        """
+        v_max  = abs(self.base_speed) * speed_multiplier
+        accel  = NASCH_ACCEL
+
+        spd = abs(self.current_speed)
+
+        # ── Step 1 · Accelerate ─────────────────────────────────────────
+        spd = min(spd + accel, v_max)
+
+        # ── Step 2 · Brake ──────────────────────────────────────────────
+        gap = self._gap_to_ahead(all_vehicles)
+        if gap is not None:
+            # Clamp speed so the vehicle won't close the gap in <8 frames.
+            # Factor of 8 chosen empirically to prevent bumping at game speeds.
+            safe_spd = max(0.0, (gap - self.w * 0.25) / 8.0)
+            spd      = min(spd, safe_spd)
+
+        # ── Step 3 · Stochastic deceleration (phantom traffic jams) ─────
+        if random.random() < self.p_slow:
+            spd = max(0.0, spd - accel)
+
+        # ── Step 4 · Move ───────────────────────────────────────────────
+        self.current_speed = -spd if self.direction_left else spd
+        self.rect.x       += int(self.current_speed)
+
+    def _gap_to_ahead(self, all_vehicles) -> float | None:
+        """
+        Returns the pixel gap to the nearest same-lane, same-direction
+        vehicle that is directly ahead, or None if the road is clear.
+        """
+        min_gap = None
+        for other in all_vehicles:
+            if (other is not self
+                    and other.lane_y        == self.lane_y
+                    and other.sub_lane      == self.sub_lane
+                    and other.direction_left == self.direction_left):
+
+                if self.direction_left:
+                    # Both move left.  'Ahead' means lower x than self.
+                    d = self.rect.x - other.rect.right
+                else:
+                    # Both move right.  'Ahead' means higher x than self.
+                    d = other.rect.x - self.rect.right
+
+                if d > 0:
+                    min_gap = d if min_gap is None else min(min_gap, d)
+        return min_gap
+
+    # ── Middle-lane AI (unchanged) ───────────────────────────────────────
     def check_head_on(self, all_vehicles):
         if self.switch_cooldown > 0:
             return
@@ -99,17 +173,6 @@ class Vehicle:
             self.rect.y          = self.lane_y + ty
             self.switch_cooldown = 60
 
-    def maintain_distance(self, all_vehicles):
-        for other in all_vehicles:
-            if (other != self and other.lane_y == self.lane_y
-                    and other.sub_lane == self.sub_lane
-                    and other.direction_left == self.direction_left):
-                d = other.rect.x - self.rect.x
-                if self.direction_left and -150 < d < -10:
-                    self.current_speed = max(self.current_speed, other.current_speed)
-                elif not self.direction_left and 10 < d < 150:
-                    self.current_speed = min(self.current_speed, other.current_speed)
-
     # ── Draw (top-down) ──────────────────────────────────────────────────
     def draw(self, screen):
         {"car": self._draw_car, "motorcycle": self._draw_motorcycle,
@@ -126,25 +189,20 @@ class Vehicle:
         r = self.rect
         pygame.draw.rect(screen, self.shadow, r.move(2, 2), border_radius=6)
         pygame.draw.rect(screen, self.color,  r,            border_radius=6)
-        # Windshield
         ws_w = 10
         ws_x = r.right - ws_w - 4 if not self.direction_left else r.x + 4
         pygame.draw.rect(screen, (180, 215, 255),
                          pygame.Rect(ws_x, r.y+4, ws_w, r.height-8), border_radius=3)
-        # Roof panel
         pygame.draw.rect(screen, self.color_dark,
                          pygame.Rect(r.x+16, r.y+5, r.width-32, r.height-10), border_radius=4)
-        # Rear window
         rw_x = r.x+4 if not self.direction_left else r.right-12
         pygame.draw.rect(screen, (140, 180, 210),
                          pygame.Rect(rw_x, r.y+4, 8, r.height-8), border_radius=2)
-        # Headlights
         lc = self._headlight_color()
         fx = self._front_x(r)
         lx = fx-3 if not self.direction_left else fx+3
         pygame.draw.circle(screen, lc, (lx, r.y+6),       4)
         pygame.draw.circle(screen, lc, (lx, r.bottom-6),  4)
-        # Tail lights
         bx = r.x+3 if not self.direction_left else r.right-3
         pygame.draw.circle(screen, (220, 30, 30), (bx, r.y+6),      3)
         pygame.draw.circle(screen, (220, 30, 30), (bx, r.bottom-6), 3)

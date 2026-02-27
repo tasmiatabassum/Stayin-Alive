@@ -8,6 +8,7 @@ from pedestrian import Pedestrian
 from spawner import Spawner
 from characters import CHARACTERS
 from round_manager import RoundManager
+from logger import GapAcceptanceLogger
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -75,6 +76,7 @@ round_manager     = None
 road              = Road()
 spawner           = None
 player            = None
+gap_logger        = None
 session_frames    = 0
 total_dashes_used = 0
 lives             = 3
@@ -159,7 +161,7 @@ def draw_new_hs_flash(surface):
     global new_hs_timer
     if new_hs_timer <= 0: return
     new_hs_timer -= 1
-    s = font_popup.render("NEW HIGH SCORE!", True, C_GOLD)
+    s = font_popup.render("★ NEW HIGH SCORE! ★", True, C_GOLD)
     s.set_alpha(min(255, new_hs_timer * 6))
     surface.blit(s, (SCREEN_WIDTH//2 - s.get_width()//2, 140))
 
@@ -289,12 +291,13 @@ def draw_radar_grid(surface):
         pygame.draw.line(surface, (15, 35, 25), (0,y), (SCREEN_WIDTH, y))
 
 def start_game(char_key):
-    global player, round_manager, spawner
+    global player, round_manager, spawner, gap_logger
     global session_frames, total_dashes_used, lives, max_lives
     global invincible_timer, new_hs_timer
     player            = Pedestrian(CHARACTERS[char_key])
     round_manager     = RoundManager(char_key)
     spawner           = Spawner(round_manager)
+    gap_logger        = GapAcceptanceLogger(char_key, fps=FPS)
     lives             = CHARACTERS[char_key]["lives"]
     max_lives         = lives
     session_frames    = 0
@@ -357,6 +360,9 @@ while running:
         if keys[pygame.K_SPACE] and player.current_dash_cooldown == 0:
             total_dashes_used += 1
         player.move(keys)
+        if gap_logger:
+            gap_logger.check_and_log(player, spawner.vehicles,
+                                     session_frames, round_manager.current_round)
         spawner.update()
 
         if player.rect.y < FAR_LANE_Y:
@@ -376,6 +382,8 @@ while running:
                     trigger_shake()
                     invincible_timer = INVINCIBLE_DUR
                     if lives <= 0:
+                        if gap_logger:
+                            gap_logger.save()
                         GAME_STATE = "GAME_OVER"
                     else:
                         spawn_popup(f"OUCH!  {lives} {'life' if lives==1 else 'lives'} left",
@@ -455,6 +463,21 @@ while running:
                                     True, (0,255,127))
         if (pygame.time.get_ticks()//500) % 2 == 0:
             canvas.blit(es, (SCREEN_WIDTH//2 - es.get_width()//2, SCREEN_HEIGHT-60))
+
+        # ── Gap acceptance model output ─────────────────────────────────
+        if gap_logger:
+            gap_lines = gap_logger.get_hud_lines()
+            gy = 155 + 8 * 42 + 12    # below main stats
+            pygame.draw.line(canvas, (0, 100, 50),
+                             (SCREEN_WIDTH//2-260, gy), (SCREEN_WIDTH//2+260, gy), 1)
+            gy += 10
+            canvas.blit(font_hud.render("> Gap Acceptance Model", True, (0, 200, 100)),
+                        (SCREEN_WIDTH//2-260, gy))
+            gy += 28
+            for ln in gap_lines:
+                canvas.blit(font_telemetry.render(ln, True, (160, 210, 160)),
+                            (SCREEN_WIDTH//2-260, gy))
+                gy += 22
 
     screen.blit(canvas, (ox, oy))
     pygame.display.flip()
