@@ -5,7 +5,9 @@ from config import *
 
 class Pedestrian:
     def __init__(self, character_data):
-        self.rect = pygame.Rect(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60,
+        # Spawn on the near-side footpath, centred horizontally
+        spawn_y = COMPOUND_Y - character_data["height"] - 10
+        self.rect = pygame.Rect(SCREEN_WIDTH // 2, spawn_y,
                                 character_data["width"], character_data["height"])
         self.color = character_data["color"]
         self.name = character_data["name"]
@@ -23,6 +25,9 @@ class Pedestrian:
         self.dash_power = character_data["dash_power"]
         self.dash_max_cooldown = character_data["dash_cooldown"]
         self.current_dash_cooldown = 0
+
+        # Bottom clamp: keep player on the near footpath (not into compound)
+        self._bottom_clamp = COMPOUND_Y - character_data["height"]
 
     def move(self, keys):
         if self.current_dash_cooldown > 0:
@@ -53,8 +58,9 @@ class Pedestrian:
         self.true_x += self.vel_x
         self.true_y += self.vel_y
 
-        if self.true_y > SCREEN_HEIGHT - 50:
-            self.true_y = SCREEN_HEIGHT - 50
+        # Clamp: can't go below near footpath (into compound)
+        if self.true_y > self._bottom_clamp:
+            self.true_y = self._bottom_clamp
             self.vel_y = 0
         if self.true_x < 0:
             self.true_x = 0
@@ -69,7 +75,7 @@ class Pedestrian:
         return dashed
 
     def reset_position(self):
-        self.rect.y = SCREEN_HEIGHT - 60
+        self.rect.y = COMPOUND_Y - self.rect.height - 10
         self.rect.x = SCREEN_WIDTH // 2
         self.true_x = float(self.rect.x)
         self.true_y = float(self.rect.y)
@@ -80,34 +86,26 @@ class Pedestrian:
         # --- Body ---
         pygame.draw.rect(screen, self.color, self.rect, border_radius=5)
 
-        # --- Directional arrow (points toward dominant velocity) ---
+        # --- Directional arrow ---
         speed = math.hypot(self.vel_x, self.vel_y)
-        if speed > 0.5:  # Only draw when actually moving
+        if speed > 0.5:
             cx = self.rect.centerx
             cy = self.rect.centery
-
-            # Normalize direction
             nx = self.vel_x / speed
             ny = self.vel_y / speed
-
             arrow_len = 10
             tip_x = cx + nx * arrow_len
             tip_y = cy + ny * arrow_len
-
-            # Arrow wings perpendicular to direction
             wing = 5
             wx = -ny * wing
             wy =  nx * wing
             base_x = cx - nx * 4
             base_y = cy - ny * 4
-
             arrow_pts = [
                 (tip_x, tip_y),
                 (base_x + wx, base_y + wy),
                 (base_x - wx, base_y - wy),
             ]
-
-            # Slightly darkened version of character color for contrast
             arrow_color = tuple(max(0, c - 80) for c in self.color)
             pygame.draw.polygon(screen, arrow_color, arrow_pts)
 

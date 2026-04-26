@@ -9,6 +9,7 @@ VEHICLE_TYPES = {
     "motorcycle": {"width": 38,  "height": 16, "weight": 3},
     "bus":        {"width": 130, "height": 46, "weight": 2},
     "truck":      {"width": 110, "height": 42, "weight": 2},
+    "cng":        {"width": 48,  "height": 30, "weight": 3},  # auto-rickshaw
 }
 
 COLORS_LEFT = {
@@ -16,12 +17,14 @@ COLORS_LEFT = {
     "motorcycle": [(230, 100, 20), (200, 60, 10)],
     "bus":        [(180, 40, 40),  (150, 20, 20)],
     "truck":      [(190, 60, 30),  (160, 40, 20)],
+    "cng":        [(180, 120, 20), (160, 100, 10)],  # yellow-green tuk-tuk
 }
 COLORS_RIGHT = {
     "car":        [(50, 100, 220), (40, 130, 200), (60, 80, 180)],
     "motorcycle": [(60, 180, 220), (40, 150, 200)],
     "bus":        [(30, 80, 180),  (20, 60, 155)],
     "truck":      [(40, 100, 170), (30, 75, 150)],
+    "cng":        [(40, 160, 120), (30, 140, 100)],  # teal tuk-tuk
 }
 
 # ── NaSch parameters ────────────────────────────────────────────────────
@@ -33,6 +36,7 @@ NASCH_P_SLOW = {
     "motorcycle": 0.08,   # bikes react faster, fewer phantom jams
     "bus":        0.15,   # buses are erratic
     "truck":      0.18,   # trucks are the worst offenders
+    "cng":        0.22,   # CNGs are wildly unpredictable
 }
 NASCH_ACCEL = 0.35        # px/frame² — acceleration per step
 
@@ -176,7 +180,8 @@ class Vehicle:
     # ── Draw (top-down) ──────────────────────────────────────────────────
     def draw(self, screen):
         {"car": self._draw_car, "motorcycle": self._draw_motorcycle,
-         "bus": self._draw_bus, "truck": self._draw_truck}[self.vtype](screen)
+         "bus": self._draw_bus, "truck": self._draw_truck,
+         "cng": self._draw_cng}[self.vtype](screen)
 
     def _front_x(self, r):
         return r.right if not self.direction_left else r.x
@@ -277,3 +282,47 @@ class Vehicle:
         lx = fx-3 if not self.direction_left else fx+3
         pygame.draw.circle(screen, lc, (lx, cab_rect.y+6),       4)
         pygame.draw.circle(screen, lc, (lx, cab_rect.bottom-6),  4)
+
+    # ── CNG / AUTO-RICKSHAW (top-down) ───────────────────────────────────
+    def _draw_cng(self, screen):
+        """
+        CNG auto-rickshaw — the iconic Dhaka three-wheeler.
+        Top-down: small boxy body, rounded front hood, open sides.
+        Distinctly smaller and squarer than a car.
+        """
+        r  = self.rect
+        cx, cy = r.centerx, r.centery
+
+        # Drop shadow
+        pygame.draw.rect(screen, self.shadow, r.move(2, 2), border_radius=8)
+
+        # Main body — rounded rect, squarish
+        pygame.draw.rect(screen, self.color, r, border_radius=8)
+
+        # Roof panel (darker, central — the CNG canopy from above)
+        roof_inset = 5
+        roof_rect  = pygame.Rect(r.x + roof_inset, r.y + roof_inset,
+                                 r.width - roof_inset*2, r.height - roof_inset*2)
+        pygame.draw.rect(screen, self.color_dark, roof_rect, border_radius=5)
+
+        # Open sides — two small bright strips showing the open cabin
+        side_h = max(3, r.height // 4)
+        pygame.draw.rect(screen, self.color_light,
+                         (r.x + 2, cy - side_h//2, 4, side_h))  # left side open
+        pygame.draw.rect(screen, self.color_light,
+                         (r.right - 6, cy - side_h//2, 4, side_h))  # right side open
+
+        # Passenger area hint (lighter rectangle in centre)
+        pygame.draw.rect(screen, tuple(min(255, c+40) for c in self.color_dark),
+                         (r.x + roof_inset + 4, cy - 4,
+                          r.width - (roof_inset+4)*2, 8), border_radius=2)
+
+        # Headlight (single, front-centre — CNGs have one)
+        lc = self._headlight_color()
+        fx = self._front_x(r)
+        lx = fx - 2 if not self.direction_left else fx + 2
+        pygame.draw.circle(screen, lc, (lx, cy), 4)
+
+        # Tail light
+        bx = r.x + 3 if not self.direction_left else r.right - 3
+        pygame.draw.circle(screen, (210, 40, 40), (bx, cy), 3)
