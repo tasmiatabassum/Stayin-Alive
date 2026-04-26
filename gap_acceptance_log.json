@@ -2310,5 +2310,244 @@
       "lognormal_mu": -0.6274,
       "lognormal_sigma": 0.6589
     }
+  },
+  {
+    "session_time": "2026-04-26T16:12:11.803573",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 99,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 164,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 271,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 308,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 450,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.212,
+        "accepted": true
+      },
+      {
+        "frame": 628,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 664,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.903,
+        "accepted": true
+      },
+      {
+        "frame": 669,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.704,
+        "accepted": true
+      },
+      {
+        "frame": 675,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 707,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 732,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 756,
+        "round": 5,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1251,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.666,
+        "accepted": true
+      },
+      {
+        "frame": 1281,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.222,
+        "accepted": true
+      },
+      {
+        "frame": 1292,
+        "round": 7,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1546,
+        "round": 7,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1567,
+        "round": 7,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.796,
+        "accepted": true
+      },
+      {
+        "frame": 1601,
+        "round": 8,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1723,
+        "round": 8,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.589,
+        "accepted": true
+      },
+      {
+        "frame": 1728,
+        "round": 8,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.474,
+        "accepted": true
+      },
+      {
+        "frame": 1736,
+        "round": 9,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1829,
+        "round": 9,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.019,
+        "accepted": true
+      },
+      {
+        "frame": 1835,
+        "round": 10,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1949,
+        "round": 10,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.04,
+        "accepted": true
+      },
+      {
+        "frame": 1964,
+        "round": 10,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.499,
+        "accepted": true
+      },
+      {
+        "frame": 1970,
+        "round": 11,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 2004,
+        "round": 11,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 2066,
+        "round": 11,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.209,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 12,
+      "mean_gap_s": 0.444,
+      "std_gap_s": 0.286,
+      "min_gap_s": 0.019,
+      "max_gap_s": 0.903,
+      "lognormal_mu": -1.2385,
+      "lognormal_sigma": 1.171
+    }
   }
 ]

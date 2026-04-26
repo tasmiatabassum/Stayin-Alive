@@ -1,7 +1,9 @@
 # pedestrian.py
 import pygame
 import math
+import os
 from config import *
+
 
 class Pedestrian:
     def __init__(self, character_data):
@@ -29,6 +31,30 @@ class Pedestrian:
         # Bottom clamp: keep player on the near footpath (not into compound)
         self._bottom_clamp = COMPOUND_Y - character_data["height"]
 
+        # ─── Sprite Animation Setup ──────────────────────────────────────────
+        self.frames = []
+        self.is_animated = False
+
+        # Dynamically load the 4 walking frames based on the character's name
+        for i in range(1, 5):
+            filename = f"{self.name.lower()}_{i}.png"
+            if os.path.exists(filename):
+                try:
+                    img = pygame.image.load(filename).convert_alpha()
+                    # Scale exactly to the width/height defined in characters.py
+                    img = pygame.transform.scale(img, (character_data["width"], character_data["height"]))
+                    self.frames.append(img)
+                except Exception as e:
+                    print(f"Warning: Could not load {filename}: {e}")
+
+        # If all 4 frames loaded successfully, enable animation
+        if len(self.frames) == 4:
+            self.is_animated = True
+
+        self.current_frame = 0.0
+        self.base_anim_speed = 0.35  # Base speed of frame cycling
+        self.facing_angle = 0.0  # Track rotation so they face the right way when idle
+
     def move(self, keys, env_friction_mult: float = 1.0):
         """
         env_friction_mult: multiplier on friction from EnvironmentManager.
@@ -45,11 +71,16 @@ class Pedestrian:
 
         dashed = False
         if keys[pygame.K_SPACE] and self.current_dash_cooldown == 0:
-            if self.vel_y < 0:   self.vel_y -= self.dash_power
-            elif self.vel_y > 0: self.vel_y += self.dash_power
-            elif self.vel_x < 0: self.vel_x -= self.dash_power
-            elif self.vel_x > 0: self.vel_x += self.dash_power
-            else:                self.vel_y -= self.dash_power
+            if self.vel_y < 0:
+                self.vel_y -= self.dash_power
+            elif self.vel_y > 0:
+                self.vel_y += self.dash_power
+            elif self.vel_x < 0:
+                self.vel_x -= self.dash_power
+            elif self.vel_x > 0:
+                self.vel_x += self.dash_power
+            else:
+                self.vel_y -= self.dash_power
             self.current_dash_cooldown = self.dash_max_cooldown
             dashed = True
 
@@ -58,9 +89,9 @@ class Pedestrian:
             self.vel_y = max(-self.max_speed, min(self.max_speed, self.vel_y))
 
         # env_friction_mult < 1 → wet surface → friction moves toward 1.0
-        # (less damping = more sliding).  Clamp so it never exceeds 0.99.
+        # (less damping = more sliding). Clamp so it never exceeds 0.99.
         effective_friction = min(0.99,
-            1.0 - (1.0 - self.friction) * env_friction_mult)
+                                 1.0 - (1.0 - self.friction) * env_friction_mult)
         self.vel_x *= effective_friction
         self.vel_y *= effective_friction
 
@@ -90,35 +121,61 @@ class Pedestrian:
         self.true_y = float(self.rect.y)
         self.vel_x = 0
         self.vel_y = 0
+        self.facing_angle = 0.0  # Reset to face straight up
 
     def draw(self, screen):
-        # --- Body ---
-        pygame.draw.rect(screen, self.color, self.rect, border_radius=5)
-
-        # --- Directional arrow ---
         speed = math.hypot(self.vel_x, self.vel_y)
-        if speed > 0.5:
-            cx = self.rect.centerx
-            cy = self.rect.centery
-            nx = self.vel_x / speed
-            ny = self.vel_y / speed
-            arrow_len = 10
-            tip_x = cx + nx * arrow_len
-            tip_y = cy + ny * arrow_len
-            wing = 5
-            wx = -ny * wing
-            wy =  nx * wing
-            base_x = cx - nx * 4
-            base_y = cy - ny * 4
-            arrow_pts = [
-                (tip_x, tip_y),
-                (base_x + wx, base_y + wy),
-                (base_x - wx, base_y - wy),
-            ]
-            arrow_color = tuple(max(0, c - 80) for c in self.color)
-            pygame.draw.polygon(screen, arrow_color, arrow_pts)
 
-        # --- Dash cooldown bar ---
+        if self.is_animated:
+            # Update animation frame and rotation only if moving
+            if speed > 0.5:
+                # Frame changes faster if the player is moving faster
+                self.current_frame += self.base_anim_speed * (speed / self.max_speed)
+                if self.current_frame >= len(self.frames):
+                    self.current_frame = 0.0
+
+                # Calculate rotation angle.
+                # atan2(-y, x) handles Pygame's inverted Y axis.
+                # We subtract 90 because the original pngs are naturally facing UP.
+                self.facing_angle = math.degrees(math.atan2(-self.vel_y, self.vel_x)) - 90
+            else:
+                self.current_frame = 0.0  # Return to idle frame when stopped
+
+            # Fetch current frame and rotate it
+            frame_img = self.frames[int(self.current_frame)]
+            rotated_img = pygame.transform.rotate(frame_img, self.facing_angle)
+
+            # Re-center the rotated image over the physical hitbox
+            new_rect = rotated_img.get_rect(center=self.rect.center)
+            screen.blit(rotated_img, new_rect.topleft)
+
+        else:
+            # --- Fallback Body (If PNGs are missing) ---
+            pygame.draw.rect(screen, self.color, self.rect, border_radius=5)
+
+            # --- Fallback Directional arrow ---
+            if speed > 0.5:
+                cx = self.rect.centerx
+                cy = self.rect.centery
+                nx = self.vel_x / speed
+                ny = self.vel_y / speed
+                arrow_len = 10
+                tip_x = cx + nx * arrow_len
+                tip_y = cy + ny * arrow_len
+                wing = 5
+                wx = -ny * wing
+                wy = nx * wing
+                base_x = cx - nx * 4
+                base_y = cy - ny * 4
+                arrow_pts = [
+                    (tip_x, tip_y),
+                    (base_x + wx, base_y + wy),
+                    (base_x - wx, base_y - wy),
+                ]
+                arrow_color = tuple(max(0, c - 80) for c in self.color)
+                pygame.draw.polygon(screen, arrow_color, arrow_pts)
+
+        # --- Dash cooldown bar (Always drawn above the player) ---
         if self.current_dash_cooldown > 0:
             bar_w = self.rect.width
             fill = (self.dash_max_cooldown - self.current_dash_cooldown) / self.dash_max_cooldown
