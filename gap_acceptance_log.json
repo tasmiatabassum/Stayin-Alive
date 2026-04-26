@@ -3790,5 +3790,1139 @@
       "lognormal_mu": -0.417,
       "lognormal_sigma": 0.9588
     }
+  },
+  {
+    "session_time": "2026-04-26T17:50:57.826314",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 142,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.238,
+        "accepted": true
+      },
+      {
+        "frame": 231,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 5.583,
+        "accepted": true
+      },
+      {
+        "frame": 235,
+        "round": 2,
+        "from_zone": "far",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 401,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.215,
+        "accepted": true
+      },
+      {
+        "frame": 581,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 3,
+      "mean_gap_s": 2.345,
+      "std_gap_s": 2.324,
+      "min_gap_s": 0.238,
+      "max_gap_s": 5.583,
+      "lognormal_mu": 0.1597,
+      "lognormal_sigma": 1.2883
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:03:23.573393",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 126,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.385,
+        "accepted": true
+      },
+      {
+        "frame": 141,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 0.114,
+        "accepted": true
+      },
+      {
+        "frame": 2150,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 2171,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 2228,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 2306,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.402,
+        "accepted": true
+      },
+      {
+        "frame": 2331,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.711,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 4,
+      "mean_gap_s": 0.403,
+      "std_gap_s": 0.211,
+      "min_gap_s": 0.114,
+      "max_gap_s": 0.711,
+      "lognormal_mu": -1.0946,
+      "lognormal_sigma": 0.6672
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:18:00.682539",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 3275,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 3276,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 3422,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 3.426,
+        "accepted": true
+      },
+      {
+        "frame": 3427,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 3509,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.28,
+        "accepted": true
+      },
+      {
+        "frame": 3530,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.84,
+        "accepted": true
+      },
+      {
+        "frame": 3552,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 3620,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.206,
+        "accepted": true
+      },
+      {
+        "frame": 3641,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.735,
+        "accepted": true
+      },
+      {
+        "frame": 3669,
+        "round": 5,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 5,
+      "mean_gap_s": 1.297,
+      "std_gap_s": 1.118,
+      "min_gap_s": 0.206,
+      "max_gap_s": 3.426,
+      "lognormal_mu": -0.1168,
+      "lognormal_sigma": 0.9089
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:20:24.980504",
+    "character": "Mrittika",
+    "events": [
+      {
+        "frame": 314,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.32,
+        "accepted": true
+      },
+      {
+        "frame": 328,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 463,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.99,
+        "accepted": true
+      },
+      {
+        "frame": 515,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 642,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 3.34,
+        "accepted": true
+      },
+      {
+        "frame": 743,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 5.938,
+        "accepted": true
+      },
+      {
+        "frame": 845,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1256,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.503,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 5,
+      "mean_gap_s": 2.418,
+      "std_gap_s": 2.008,
+      "min_gap_s": 0.503,
+      "max_gap_s": 5.938,
+      "lognormal_mu": 0.5136,
+      "lognormal_sigma": 0.8784
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:26:05.040480",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 42,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 64,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 86,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 114,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 145,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 156,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 180,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 231,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 306,
+        "round": 3,
+        "from_zone": "far",
+        "to_lane": "middle",
+        "time_gap_s": 0.336,
+        "accepted": true
+      },
+      {
+        "frame": 332,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 354,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 406,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 428,
+        "round": 5,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 459,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.225,
+        "accepted": true
+      },
+      {
+        "frame": 487,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.465,
+        "accepted": true
+      },
+      {
+        "frame": 493,
+        "round": 6,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 520,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.156,
+        "accepted": true
+      },
+      {
+        "frame": 700,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.309,
+        "accepted": true
+      },
+      {
+        "frame": 722,
+        "round": 7,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 730,
+        "round": 7,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 3.838,
+        "accepted": true
+      },
+      {
+        "frame": 742,
+        "round": 7,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 2.611,
+        "accepted": true
+      },
+      {
+        "frame": 774,
+        "round": 8,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 860,
+        "round": 8,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.7,
+        "accepted": true
+      },
+      {
+        "frame": 881,
+        "round": 8,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 1.042,
+        "accepted": true
+      },
+      {
+        "frame": 902,
+        "round": 9,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 910,
+        "round": 9,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 916,
+        "round": 9,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 946,
+        "round": 10,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 970,
+        "round": 10,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.916,
+        "accepted": true
+      },
+      {
+        "frame": 992,
+        "round": 10,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 1.581,
+        "accepted": true
+      },
+      {
+        "frame": 1027,
+        "round": 11,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1080,
+        "round": 11,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.138,
+        "accepted": true
+      },
+      {
+        "frame": 1087,
+        "round": 12,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1111,
+        "round": 12,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 11.895,
+        "accepted": true
+      },
+      {
+        "frame": 1136,
+        "round": 12,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 13.583,
+        "accepted": true
+      },
+      {
+        "frame": 1253,
+        "round": 13,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1396,
+        "round": 13,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.855,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 15,
+      "mean_gap_s": 2.71,
+      "std_gap_s": 4.052,
+      "min_gap_s": 0.138,
+      "max_gap_s": 13.583,
+      "lognormal_mu": 0.175,
+      "lognormal_sigma": 1.2307
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:26:25.937784",
+    "character": "Mrittika",
+    "events": [
+      {
+        "frame": 182,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.666,
+        "accepted": true
+      },
+      {
+        "frame": 244,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 383,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.695,
+        "accepted": true
+      },
+      {
+        "frame": 486,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 1.779,
+        "accepted": true
+      },
+      {
+        "frame": 586,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 943,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.183,
+        "accepted": true
+      },
+      {
+        "frame": 967,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 4,
+      "mean_gap_s": 0.831,
+      "std_gap_s": 0.584,
+      "min_gap_s": 0.183,
+      "max_gap_s": 1.779,
+      "lognormal_mu": -0.4731,
+      "lognormal_sigma": 0.809
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:32:37.907001",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 53,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.819,
+        "accepted": true
+      },
+      {
+        "frame": 62,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 97,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 171,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.931,
+        "accepted": true
+      },
+      {
+        "frame": 176,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.961,
+        "accepted": true
+      },
+      {
+        "frame": 189,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 322,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.131,
+        "accepted": true
+      },
+      {
+        "frame": 404,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 1.8,
+        "accepted": true
+      },
+      {
+        "frame": 417,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 474,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.303,
+        "accepted": true
+      },
+      {
+        "frame": 587,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 624,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 3.349,
+        "accepted": true
+      },
+      {
+        "frame": 789,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 900,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.349,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 8,
+      "mean_gap_s": 1.33,
+      "std_gap_s": 0.928,
+      "min_gap_s": 0.303,
+      "max_gap_s": 3.349,
+      "lognormal_mu": 0.02,
+      "lognormal_sigma": 0.7679
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:33:43.526501",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 268,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.195,
+        "accepted": true
+      },
+      {
+        "frame": 274,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 391,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 432,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 531,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 539,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 559,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 2.235,
+        "accepted": true
+      },
+      {
+        "frame": 611,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 682,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 860,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.887,
+        "accepted": true
+      },
+      {
+        "frame": 878,
+        "round": 5,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 973,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.565,
+        "accepted": true
+      },
+      {
+        "frame": 1027,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1088,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.153,
+        "accepted": true
+      },
+      {
+        "frame": 1225,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.28,
+        "accepted": true
+      },
+      {
+        "frame": 1237,
+        "round": 7,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1315,
+        "round": 7,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.782,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 7,
+      "mean_gap_s": 0.871,
+      "std_gap_s": 0.638,
+      "min_gap_s": 0.195,
+      "max_gap_s": 2.235,
+      "lognormal_mu": -0.414,
+      "lognormal_sigma": 0.771
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:34:10.478224",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 131,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 27.417,
+        "accepted": true
+      },
+      {
+        "frame": 139,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 194,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 262,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.62,
+        "accepted": true
+      },
+      {
+        "frame": 294,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 339,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 364,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 2.306,
+        "accepted": true
+      },
+      {
+        "frame": 397,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 505,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.915,
+        "accepted": true
+      },
+      {
+        "frame": 578,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 624,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 16.333,
+        "accepted": true
+      },
+      {
+        "frame": 816,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 7.25,
+        "accepted": true
+      },
+      {
+        "frame": 841,
+        "round": 6,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 869,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.108,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 7,
+      "mean_gap_s": 7.993,
+      "std_gap_s": 9.499,
+      "min_gap_s": 0.62,
+      "max_gap_s": 27.417,
+      "lognormal_mu": 1.2081,
+      "lognormal_sigma": 1.3846
+    }
+  },
+  {
+    "session_time": "2026-04-26T18:43:38.109064",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 135,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.717,
+        "accepted": true
+      },
+      {
+        "frame": 186,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 243,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 324,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 1,
+      "mean_gap_s": 0.717,
+      "std_gap_s": 0.0,
+      "min_gap_s": 0.717,
+      "max_gap_s": 0.717,
+      "lognormal_mu": -0.3327,
+      "lognormal_sigma": null
+    }
   }
 ]
