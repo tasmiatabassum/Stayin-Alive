@@ -65,6 +65,10 @@ class RoundManager:
         self.base_spawn_rate = 40
         self.min_spawn_rate  = 15
 
+        # ── Non-Homogeneous Poisson Process session clock ─────────────
+        self.session_frame = 0          # incremented externally each frame
+        self.session_duration = 18000   # 5 min at 60 fps — full λ(t) cycle
+
     # ── Level parameter helpers ──────────────────────────────────────────
     @property
     def _lambda_mult(self):
@@ -136,7 +140,6 @@ class RoundManager:
                 mean = lo + (hi - lo) * 0.75 + round_boost
             std = 1.20 + (self.current_round - 1) * 0.07
 
-        # Apply level speed multiplier to ceiling
         new_hi = (hi + round_boost) * self._speed_mult
         return truncated_normal_speed(mean * self._speed_mult, std, lo, new_hi)
 
@@ -162,7 +165,7 @@ class RoundManager:
             "cng":        min(3.0, r * 0.3),
         }
 
-    # ── NaSch p_slow (vehicle.py reads this) ─────────────────────────────
+    # ── NaSch p_slow ─────────────────────────────
     def get_nasch_p_slow(self, vtype: str) -> float:
         base = {
             "car": 0.10, "motorcycle": 0.08,
@@ -178,6 +181,32 @@ class RoundManager:
     def get_middle_bidirectional_prob(self) -> float:
         base = self._bidir_prob
         return min(0.95, base + self.current_round * 0.04)
+
+    # ── Non-Homogeneous Poisson Process  λ(t) ────────────────────────────
+    def get_rush_hour_lambda_mult(self) -> float:
+        tau = min(1.0, self.session_frame / max(1, self.session_duration))
+        morning = 0.85 * math.exp(-((tau - 0.20) ** 2) / (2 * 0.06 ** 2))
+        evening = 1.00 * math.exp(-((tau - 0.72) ** 2) / (2 * 0.05 ** 2))
+        return 0.40 + morning + evening
+
+    def get_rush_phase(self) -> tuple:
+        mult = self.get_rush_hour_lambda_mult()
+        intensity = min(1.0, (mult - 0.40) / 1.00)
+
+        if intensity < 0.20:
+            label = "OFF-PEAK"
+        elif intensity < 0.45:
+            label = "BUILDING"
+        elif intensity < 0.70:
+            label = "RUSH HOUR"
+        elif intensity < 0.88:
+            label = "PEAK RUSH"
+        else:
+            label = "⚠ GRIDLOCK"
+        return label, intensity
+
+    def tick_session(self):
+        self.session_frame += 1
 
     # ── Legacy compat ─────────────────────────────────────────────────────
     def get_lane_weights(self):
