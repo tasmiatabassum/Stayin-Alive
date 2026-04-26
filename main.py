@@ -14,9 +14,71 @@ from environment import EnvironmentManager
 from obstacles import ObstacleManager
 
 pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+# ── Display scaling system ────────────────────────────────────────────────
+# All game logic renders onto a fixed 1000x700 logical canvas.
+# That canvas is then smoothscale'd to fill the real window with NO black
+# bars.  Mouse coords are remapped back to logical space before any checks.
+#
+# Window size presets (10:7 proportion):
+#   XS  = 700x490,  SM = 800x560,  MD = 1000x700 (default),
+#   LG  = 1200x840, XL = 1400x980
+#   FS  = monitor native fullscreen (no bars, stretches to fill)
+
+_LOGICAL_W = SCREEN_WIDTH   # 1000
+_LOGICAL_H = SCREEN_HEIGHT  # 700
+
+_WIN_PRESETS = [
+    ("XS",  700,  490),
+    ("SM",  800,  560),
+    ("MD", 1000,  700),
+    ("LG", 1200,  840),
+    ("XL", 1400,  980),
+]
+_preset_idx    = 2   # start at MD
+_is_fullscreen = False
+
+_info = pygame.display.Info()
+_DESK_W, _DESK_H = _info.current_w, _info.current_h
+
+
+def _apply_window():
+    global screen
+    if _is_fullscreen:
+        screen = pygame.display.set_mode((_DESK_W, _DESK_H), pygame.FULLSCREEN)
+    else:
+        _, ww, wh = _WIN_PRESETS[_preset_idx]
+        screen = pygame.display.set_mode((ww, wh), pygame.RESIZABLE)
+
+
+_apply_window()
 pygame.display.set_caption("Stayin' Alive (in boardbazar)")
 clock = pygame.time.Clock()
+
+
+def _remap_mouse(raw_pos):
+    sw, sh = screen.get_size()
+    return (int(raw_pos[0] * _LOGICAL_W / sw),
+            int(raw_pos[1] * _LOGICAL_H / sh))
+
+
+def toggle_fullscreen():
+    global _is_fullscreen
+    _is_fullscreen = not _is_fullscreen
+    _apply_window()
+
+
+def cycle_window_size(direction=1):
+    global _preset_idx, _is_fullscreen
+    _is_fullscreen = False
+    _preset_idx = max(0, min(len(_WIN_PRESETS) - 1, _preset_idx + direction))
+    _apply_window()
+
+
+def handle_resize(new_w, new_h):
+    global screen
+    if not _is_fullscreen:
+        screen = pygame.display.set_mode((new_w, new_h), pygame.RESIZABLE)
 
 # --- Fonts ---
 font_lore = pygame.font.SysFont("Gothic", 25)
@@ -68,11 +130,18 @@ go_retry_rect = pygame.Rect((SCREEN_WIDTH // 2) - GO_W - 20, SCREEN_HEIGHT - 130
 go_select_rect = pygame.Rect((SCREEN_WIDTH // 2) + 20, SCREEN_HEIGHT - 130, GO_W, GO_H)
 
 # Pause menu buttons
-PB_W, PB_H = 260, 58
-pause_resume_rect = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 280, PB_W, PB_H)
-pause_session_rect = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 355, PB_W, PB_H)
-pause_home_rect = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 430, PB_W, PB_H)
-pause_quit_rect = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 505, PB_W, PB_H)
+PB_W, PB_H = 260, 52
+pause_resume_rect  = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 250, PB_W, PB_H)
+pause_session_rect = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 315, PB_W, PB_H)
+pause_home_rect    = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 380, PB_W, PB_H)
+pause_quit_rect    = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 445, PB_W, PB_H)
+
+# Window-size controls in pause menu  (smaller arrow | label | bigger arrow)
+_SZ_BTN = 34
+pause_sz_label_rect  = pygame.Rect((SCREEN_WIDTH // 2) - 60, 516, 120, _SZ_BTN)
+pause_sz_down_rect   = pygame.Rect((SCREEN_WIDTH // 2) - 60 - _SZ_BTN - 6, 516, _SZ_BTN, _SZ_BTN)
+pause_sz_up_rect     = pygame.Rect((SCREEN_WIDTH // 2) + 60 + 6,            516, _SZ_BTN, _SZ_BTN)
+pause_fs_rect        = pygame.Rect((SCREEN_WIDTH // 2) - PB_W // 2, 560, PB_W, _SZ_BTN)
 
 # 4. Game world
 round_manager = None
@@ -320,12 +389,23 @@ def draw_pause(surface):
 
     cx = SCREEN_WIDTH // 2
     title = font_game_over.render("PAUSED", True, C_ORANGE)
-    surface.blit(title, (cx - title.get_width() // 2, 170))
+    surface.blit(title, (cx - title.get_width() // 2, 155))
 
-    _pill(surface, pause_resume_rect, C_LIME, "RESUME")
-    _pill(surface, pause_session_rect, (100, 160, 220), "SESSION DATA")
-    _pill(surface, pause_home_rect, (200, 200, 200), "HOME")
-    _pill(surface, pause_quit_rect, (180, 40, 40), "QUIT GAME")
+    _pill(surface, pause_resume_rect,  C_LIME,           "RESUME")
+    _pill(surface, pause_session_rect, (100, 160, 220),  "SESSION DATA")
+    _pill(surface, pause_home_rect,    (200, 200, 200),  "HOME")
+    _pill(surface, pause_quit_rect,    (180, 40,  40),   "QUIT GAME")
+
+    # ── Window size row ───────────────────────────────────────────────────
+    font_sz = pygame.font.SysFont("Courier New", 14, bold=True)
+    label   = (_WIN_PRESETS[_preset_idx][0] if not _is_fullscreen else "FS")
+    _pill(surface, pause_sz_down_rect, (60, 60, 60),  "<")
+    _pill(surface, pause_sz_label_rect,(40, 40, 40),  label)
+    _pill(surface, pause_sz_up_rect,   (60, 60, 60),  ">")
+    fs_col = (C_GOLD if _is_fullscreen else (55, 55, 55))
+    _pill(surface, pause_fs_rect, fs_col, "F11  FULLSCREEN (NO BARS)")
+    hint = font_sz.render("WINDOW SIZE", True, (100, 100, 100))
+    surface.blit(hint, (cx - hint.get_width() // 2, 505))
 
 
 # ── Misc helpers ─────────────────────────────────────────────────────────
@@ -398,7 +478,11 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.VIDEORESIZE:
+            handle_resize(event.w, event.h)
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_F11:
+                toggle_fullscreen()
             if event.key == pygame.K_ESCAPE:
                 if GAME_STATE == "RUNNING":
                     GAME_STATE = "PAUSED"
@@ -407,7 +491,7 @@ while running:
                 else:
                     running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mp = event.pos
+            mp = _remap_mouse(event.pos)
             if GAME_STATE == "POST_SESSION": running = False
             if GAME_STATE in ["START", "SELECT"]:
                 if quit_btn_rect.collidepoint(mp): running = False
@@ -420,6 +504,12 @@ while running:
                     GAME_STATE = "START"
                 elif pause_quit_rect.collidepoint(mp):
                     running = False
+                elif pause_sz_down_rect.collidepoint(mp):
+                    cycle_window_size(-1)
+                elif pause_sz_up_rect.collidepoint(mp):
+                    cycle_window_size(+1)
+                elif pause_fs_rect.collidepoint(mp):
+                    toggle_fullscreen()
             if GAME_STATE == "START":
                 if start_button_rect.collidepoint(mp): GAME_STATE = "SELECT"
             elif GAME_STATE == "SELECT":
@@ -512,7 +602,7 @@ while running:
     elif GAME_STATE == "SELECT":
         canvas.blit(selection_bg, (0, 0))
         draw_quit_button(canvas)
-        mp = pygame.mouse.get_pos()
+        mp = _remap_mouse(pygame.mouse.get_pos())
         if badrul_btn_rect.collidepoint(mp):
             draw_lore_card(canvas, "Badrul")
         elif mrittika_btn_rect.collidepoint(mp):
@@ -535,7 +625,7 @@ while running:
         draw_shake_message(canvas)
         draw_new_hs_flash(canvas)
         draw_stun_overlay(canvas, obstacle_manager.stun_timer)
-        hint = font_telemetry.render("[ESC] Pause", True, (80, 120, 80))
+        hint = font_telemetry.render("[ESC] Pause   [F11] Fullscreen", True, (80, 120, 80))
         canvas.blit(hint, (SCREEN_WIDTH - hint.get_width() - 12, 12))
 
     elif GAME_STATE == "PAUSED":
@@ -608,7 +698,13 @@ while running:
             canvas.blit(font_telemetry.render(env_line, True, (140, 200, 155)),
                         (SCREEN_WIDTH // 2 - 260, gy_env))
 
-    screen.blit(canvas, (ox, oy))
+    # Scale logical canvas to fill the real window (no black bars)
+    # Shake offset is applied in logical space before scaling
+    shake_surf = pygame.Surface((_LOGICAL_W, _LOGICAL_H))
+    shake_surf.fill(COLOR_BG)
+    shake_surf.blit(canvas, (ox, oy))
+    scaled = pygame.transform.smoothscale(shake_surf, screen.get_size())
+    screen.blit(scaled, (0, 0))
     pygame.display.flip()
     clock.tick(FPS)
 
