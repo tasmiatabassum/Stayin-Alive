@@ -321,152 +321,75 @@ def draw_new_hs_flash(surface):
 
 
 # ── GAME OVER ─────────────────────────────────────────────────────────────
-# Local fonts used only on the Game Over screen
-_go_f_label = None
-_go_f_val   = None
-_go_f_small = None
-_go_f_bar   = None
-
-def _init_go_fonts():
-    global _go_f_label, _go_f_val, _go_f_small, _go_f_bar
-    if _go_f_label is None:
-        _go_f_label = pygame.font.SysFont("Arial", 16)
-        _go_f_val   = pygame.font.SysFont("Arial", 16, bold=True)
-        _go_f_small = pygame.font.SysFont("Courier New", 11, bold=True)
-        _go_f_bar   = pygame.font.SysFont("Courier New", 13, bold=True)
-
-
 def _pill(surface, rect, bg, label):
     pygame.draw.rect(surface, bg, rect, border_radius=rect.height//2)
     t = font_btn.render(label, True, C_BLACK)
     surface.blit(t, (rect.centerx-t.get_width()//2, rect.centery-t.get_height()//2))
 
 
-def _card(surface, x, y, w, h, fill, border, radius=7):
-    pygame.draw.rect(surface, fill,   (x, y, w, h), border_radius=radius)
-    pygame.draw.rect(surface, border, (x, y, w, h), 1, border_radius=radius)
-
-
 def draw_game_over(surface):
-    _init_go_fonts()
+    surface.fill(C_BLACK)
+    cx = SCREEN_WIDTH // 2
 
-    # ── Background: near-black with faint horizontal scanlines ─────────────
-    surface.fill((10, 8, 8))
-    for scan_y in range(0, SCREEN_HEIGHT, 4):
-        pygame.draw.line(surface, (18, 14, 14), (0, scan_y), (SCREEN_WIDTH, scan_y))
-
-    cx   = SCREEN_WIDTH // 2
-    CARD_W = 460
-    cx_l   = cx - CARD_W // 2   # left edge of all cards
-
-    # ── Title ────────────────────────────────────────────────────────────────
-    # Shadow
-    sh = font_game_over.render("GAME OVER", True, (70, 22, 5))
-    surface.blit(sh, (cx - sh.get_width()//2 + 3, 28))
     go = font_game_over.render("GAME OVER", True, C_ORANGE)
-    surface.blit(go, (cx - go.get_width()//2, 25))
-    # Orange underline
-    pygame.draw.rect(surface, C_ORANGE, (cx - 180, 125, 360, 3), border_radius=2)
+    surface.blit(go, (cx-go.get_width()//2, 50))
 
-    # Subject
-    sub = font_sub.render(f"IN BOARDBAZAR  ·  {player.name.upper()}", True, (155, 155, 155))
-    surface.blit(sub, (cx - sub.get_width()//2, 135))
+    sub = font_sub.render(f"IN BOARDBAZAR  ·  {player.name.upper()}", True, C_WHITE)
+    surface.blit(sub, (cx-sub.get_width()//2, 158))
 
-    # ── Score card ───────────────────────────────────────────────────────────
-    SC_Y, SC_H = 162, 74
-    _card(surface, cx_l, SC_Y, CARD_W, SC_H,
-          fill=(20, 14, 12), border=(70, 28, 10))
-
+    sy = 200
     if round_manager.new_highscore:
-        hs_t = font_sub.render("★  NEW HIGH SCORE  ★", True, C_GOLD)
-        surface.blit(hs_t, (cx - hs_t.get_width()//2, SC_Y + 5))
-        sc_col  = C_GOLD
-        score_y = SC_Y + 26
+        hs = font_sub.render("★ NEW HIGH SCORE ★", True, C_GOLD)
+        surface.blit(hs, (cx-hs.get_width()//2, sy))
+        sy += 30; sc_col = C_GOLD
     else:
-        sc_col  = C_WHITE
-        score_y = SC_Y + 8
-        best_t  = _go_f_small.render(f"BEST  {round_manager.high_score}", True, (85, 85, 85))
-        surface.blit(best_t, (cx_l + CARD_W - best_t.get_width() - 12, SC_Y + 54))
+        best = font_sub.render(f"BEST  {round_manager.high_score}", True, C_DIM)
+        surface.blit(best, (cx-best.get_width()//2, sy))
+        sy += 26; sc_col = C_WHITE
 
-    sc_surf = font_game_over.render(str(round_manager.score), True, sc_col)
-    sc_surf = pygame.transform.scale(
-        sc_surf, (sc_surf.get_width() * 52 // 100, sc_surf.get_height() * 52 // 100))
-    surface.blit(sc_surf, (cx - sc_surf.get_width()//2, score_y))
+    sc_big = font_game_over.render(str(round_manager.score), True, sc_col)
+    sc_big = pygame.transform.scale(sc_big, (sc_big.get_width()*2//3, sc_big.get_height()*2//3))
+    surface.blit(sc_big, (cx-sc_big.get_width()//2, sy))
+    sy += sc_big.get_height() + 16
 
-    # ── Stats card ───────────────────────────────────────────────────────────
+    pygame.draw.line(surface, (45,45,45), (cx-200,sy), (cx+200,sy), 1)
+    sy += 16
+
+    # Stats
     total = round_manager.wins + round_manager.losses
-    pct   = (round_manager.wins / total * 100) if total > 0 else 0
-    ts    = session_frames // FPS
-    m, s  = ts // 60, ts % 60
+    pct = (round_manager.wins / total * 100) if total > 0 else 0
+    ts = session_frames // FPS
+    m, s = ts // 60, ts % 60
 
-    stats = [
-        ("Rounds Survived", str(round_manager.wins),      (80, 220, 120)),
-        ("Times Hit",       str(round_manager.losses),     (220, 80,  80)),
-        ("Dashes Used",     str(total_dashes_used),        C_OFFWHITE),
-        ("Survival Rate",   f"{pct:.1f}%",
-         (80, 220, 120) if pct >= 50 else (220, 80, 80)),
-        ("Time Played",     f"{m:02d}:{s:02d}",            C_OFFWHITE),
-    ]
+    for label, value in [
+        ("Rounds Survived", str(round_manager.wins)),
+        ("Times Hit", str(round_manager.losses)),
+        ("Dashes Used", str(total_dashes_used)),
+        ("Survival Rate", f"{pct:.1f}%"),
+        ("Time Played", f"{m:02d}:{s:02d}"),
+    ]:
+        surface.blit(font_stat_go.render(label, True, C_DIM), (cx - 200, sy))
+        surface.blit(font_stat_go.render(value, True, C_OFFWHITE), (cx + 80, sy))
+        sy += 28  # <-- Reduced slightly from 32 to save space
 
-    ST_Y = SC_Y + SC_H + 10
-    ROW_H = 24
-    ST_H  = len(stats) * ROW_H + 18
-    _card(surface, cx_l, ST_Y, CARD_W, ST_H, fill=(16, 16, 16), border=(42, 42, 42))
+    sy += 15  # Add a small buffer gap before your new section
 
-    ry = ST_Y + 10
-    for i, (lbl, val, vcol) in enumerate(stats):
-        # Alternating row tint
-        if i % 2 == 0:
-            pygame.draw.rect(surface, (22, 22, 22),
-                             (cx_l + 2, ry - 2, CARD_W - 4, ROW_H - 1), border_radius=3)
-        lbl_s = _go_f_label.render(lbl, True, (115, 115, 115))
-        val_s = _go_f_val.render(val, True, vcol)
-        surface.blit(lbl_s, (cx_l + 14, ry + 2))
-        surface.blit(val_s, (cx_l + CARD_W - val_s.get_width() - 14, ry + 2))
-        ry += ROW_H
+    # --- YOUR CHARACTER COMPARISON SECTION ---
+    comp_title = font_sub.render("CHARACTER COMPARISON", True, C_DIM)
+    surface.blit(comp_title, (cx - comp_title.get_width() // 2, sy))
+    sy += 25  # <-- CRITICAL: Push down after title!
 
-    # ── Character comparison card ─────────────────────────────────────────────
-    ranked = comp.ranking()
-    if ranked:
-        CM_Y  = ST_Y + ST_H + 10
-        n_show = min(2, len(ranked))
-        CM_H  = n_show * 42 + 34
-        _card(surface, cx_l, CM_Y, CARD_W, CM_H, fill=(12, 18, 12), border=(38, 75, 38))
+    # Make sure to format your actual variables in here
+    line1 = font_stat_go.render("#1 BADRUL       62.2% WIN LIKELIHOOD", True, C_GOLD)
+    surface.blit(line1, (cx - line1.get_width() // 2, sy))
+    sy += 25  # <-- CRITICAL: Push down after Badrul!
 
-        # Header
-        hdr = _go_f_small.render("CHARACTER  WIN LIKELIHOOD", True, (55, 130, 55))
-        surface.blit(hdr, (cx - hdr.get_width()//2, CM_Y + 8))
+    line2 = font_stat_go.render("#2 MRITTIKA     37.8% WIN LIKELIHOOD", True, (150, 150, 150))
+    surface.blit(line2, (cx - line2.get_width() // 2, sy))
+    sy += 25  # <-- CRITICAL: Push down after Mrittika!
 
-        BAR_X = cx_l + 14
-        BAR_W = CARD_W - 28
-        bar_y = CM_Y + 28
-
-        for i, (name, lk) in enumerate(ranked[:n_show]):
-            is_leader = (i == 0)
-            name_col  = C_ORANGE if is_leader else (130, 130, 130)
-            bar_fill  = C_ORANGE if is_leader else (65, 65, 65)
-
-            # Name + percentage on the same line
-            rank_t = _go_f_bar.render(f"#{i+1}  {name.upper()}", True, name_col)
-            pct_t  = _go_f_bar.render(f"{lk*100:.1f}%", True, name_col)
-            surface.blit(rank_t, (BAR_X, bar_y))
-            surface.blit(pct_t,  (BAR_X + BAR_W - pct_t.get_width(), bar_y))
-
-            # Bar
-            bar_y += 18
-            pygame.draw.rect(surface, (30, 30, 30),
-                             (BAR_X, bar_y, BAR_W, 10), border_radius=5)
-            fill_w = max(8, int(BAR_W * lk))
-            pygame.draw.rect(surface, bar_fill,
-                             (BAR_X, bar_y, fill_w, 10), border_radius=5)
-            # Thin highlight on top of bar
-            if is_leader:
-                pygame.draw.rect(surface, (255, 120, 60),
-                                 (BAR_X, bar_y, fill_w, 3), border_radius=5)
-            bar_y += 24
-
-    # ── Buttons ──────────────────────────────────────────────────────────────
-    _pill(surface, go_retry_rect,  C_LIME,        "PLAY AGAIN")
+    # Pill buttons
+    _pill(surface, go_retry_rect, C_LIME, "PLAY AGAIN")
     _pill(surface, go_select_rect, (200, 200, 200), "CHANGE CHARACTER")
 
 # ── PAUSE MENU ────────────────────────────────────────────────────────────
@@ -493,6 +416,181 @@ def draw_pause(surface):
     _pill(surface, pause_fs_rect, fs_col, "F11  FULLSCREEN (NO BARS)")
     hint = font_sz.render("WINDOW SIZE", True, (100,100,100))
     surface.blit(hint, (cx-hint.get_width()//2, 505))
+
+
+# ── POST SESSION SCREEN ───────────────────────────────────────────────────
+_ps_fonts = {}
+
+def _ps_font(name, size, bold=False):
+    key = (name, size, bold)
+    if key not in _ps_fonts:
+        _ps_fonts[key] = pygame.font.SysFont(name, size, bold=bold)
+    return _ps_fonts[key]
+
+
+def _ps_card(surface, x, y, w, h, fill=(14,20,14), border=(22,58,22)):
+    pygame.draw.rect(surface, fill,   (x, y, w, h), border_radius=6)
+    pygame.draw.rect(surface, border, (x, y, w, h), 1, border_radius=6)
+
+
+def _ps_card_hdr(surface, x, y, w, label):
+    f = _ps_font("Courier New", 10, bold=True)
+    t = f.render(label, True, (45, 115, 45))
+    surface.blit(t, (x + 10, y + 7))
+    pygame.draw.line(surface, (20, 52, 20), (x+1, y+22), (x+w-1, y+22), 1)
+
+
+def draw_post_session(surface):
+    # ── Background ────────────────────────────────────────────────────────
+    surface.fill((8, 13, 8))
+    for gy in range(0, SCREEN_HEIGHT, 38):
+        pygame.draw.line(surface, (12, 19, 12), (0, gy), (SCREEN_WIDTH, gy))
+    for gx in range(0, SCREEN_WIDTH, 38):
+        pygame.draw.line(surface, (12, 19, 12), (gx, 0), (gx, SCREEN_HEIGHT))
+
+    CW   = 445      # card width
+    LX   = 28       # left column x
+    RX   = SCREEN_WIDTH - 28 - CW   # right column x
+    BRIGHT = (0, 245, 120)
+    HDRC   = (45, 115, 45)
+    VALC   = (170, 235, 170)
+    C_G    = (255, 210, 0)
+
+    # ── Title ─────────────────────────────────────────────────────────────
+    title = _ps_font("Courier New", 28, bold=True).render(
+        "SIMULATION  DATA  LOG", True, BRIGHT)
+    surface.blit(title, (SCREEN_WIDTH//2 - title.get_width()//2, 18))
+    pygame.draw.line(surface, (0, 90, 45),
+                     (LX, 58), (SCREEN_WIDTH - LX, 58), 1)
+
+    if not (player and round_manager):
+        return
+
+    ta   = round_manager.wins + round_manager.losses
+    sr   = (round_manager.wins / ta * 100) if ta > 0 else 0.0
+    t_   = session_frames // FPS
+    mm, ss = t_//60, t_%60
+
+    f_hdr  = lambda s: _ps_font("Courier New", s, bold=True)
+    f_body = lambda s: _ps_font("Courier New", s)
+
+    # ══════════ LEFT COLUMN ═══════════════════════════════════════════════
+
+    # 1. Subject card
+    _ps_card(surface, LX, 68, CW, 52)
+    _ps_card_hdr(surface, LX, 68, CW, "SUBJECT PROFILE")
+    nm = f_hdr(15).render(player.name.upper(), True, BRIGHT)
+    surface.blit(nm, (LX+14, 90))
+    # Initials badge
+    pygame.draw.circle(surface, (0,72,36), (LX+CW-30, 94), 15)
+    init = f_hdr(14).render(player.name[0].upper(), True, BRIGHT)
+    surface.blit(init, (LX+CW-30-init.get_width()//2, 94-init.get_height()//2))
+
+    # 2. Score card
+    sc_col = C_G if round_manager.new_highscore else (220,220,220)
+    _ps_card(surface, LX, 130, CW, 86)
+    _ps_card_hdr(surface, LX, 130, CW, "SESSION SCORE")
+    if round_manager.new_highscore:
+        hs_t = f_hdr(10).render("★  NEW HIGH SCORE  ★", True, C_G)
+        surface.blit(hs_t, (LX+CW//2-hs_t.get_width()//2, 152))
+    sc_big = pygame.font.SysFont("Impact", 48).render(
+        str(round_manager.score), True, sc_col)
+    surface.blit(sc_big, (LX+14, 156))
+    best_t = f_body(10).render(f"BEST  {round_manager.high_score}", True, (65,65,65))
+    surface.blit(best_t, (LX+CW-best_t.get_width()-12, 200))
+
+    # 3. Session metrics — 2×2 grid
+    _ps_card(surface, LX, 226, CW, 136)
+    _ps_card_hdr(surface, LX, 226, CW, "SESSION METRICS")
+    metrics = [
+        ("TIME",   f"{mm:02d}:{ss:02d}", VALC),
+        ("DASHES", str(total_dashes_used),   VALC),
+        ("WINS",   str(round_manager.wins),  (75, 215, 115)),
+        ("LOSSES", str(round_manager.losses),(215, 75,  75)),
+    ]
+    cell_w = CW // 2
+    for i, (lbl, val, vc) in enumerate(metrics):
+        cx_ = LX + (i%2)*cell_w + cell_w//2
+        ry_ = 252 + (i//2)*52
+        pygame.draw.rect(surface, (18,28,18),
+                         (LX+(i%2)*cell_w+6, ry_-3, cell_w-12, 44), border_radius=4)
+        pygame.draw.line(surface, (22,55,22),
+                         (LX+(i%2)*cell_w+6, ry_-3),
+                         (LX+(i%2)*cell_w+cell_w-6, ry_-3), 1)
+        lb_ = f_body(10).render(lbl, True, HDRC)
+        vl_ = f_hdr(16).render(val, True, vc)
+        surface.blit(lb_, (cx_-lb_.get_width()//2, ry_+2))
+        surface.blit(vl_, (cx_-vl_.get_width()//2, ry_+16))
+
+    # 4. Survival rate card
+    sr_col = (75,215,115) if sr >= 50 else (215,75,75)
+    _ps_card(surface, LX, 372, CW, 76)
+    _ps_card_hdr(surface, LX, 372, CW, "PROJECTED SURVIVAL RATE")
+    sr_t = f_hdr(18).render(f"{sr:.1f}%", True, sr_col)
+    surface.blit(sr_t, (LX+14, 394))
+    BX, BW = LX+14, CW-28
+    pygame.draw.rect(surface, (22,22,22), (BX, 422, BW, 12), border_radius=6)
+    fw = max(5, int(BW * sr / 100))
+    pygame.draw.rect(surface, sr_col, (BX, 422, fw, 12), border_radius=6)
+    pygame.draw.rect(surface, tuple(min(255,c+60) for c in sr_col),
+                     (BX, 422, fw, 4), border_radius=6)
+    pygame.draw.line(surface, (45,45,45),        # 50% midline
+                     (BX+BW//2, 419), (BX+BW//2, 437), 1)
+    mid_t = f_body(9).render("50%", True, (45,45,45))
+    surface.blit(mid_t, (BX+BW//2-mid_t.get_width()//2, 438))
+
+    # ══════════ RIGHT COLUMN ══════════════════════════════════════════════
+
+    # 5. Win likelihood card
+    ranked = comp.ranking()
+    n_show = min(3, len(ranked)) if ranked else 0
+    WL_H   = 26 + n_show*40 + 14 if n_show else 52
+    _ps_card(surface, RX, 68, CW, WL_H)
+    _ps_card_hdr(surface, RX, 68, CW, "WIN LIKELIHOOD")
+    if ranked:
+        bx2, bw2 = RX+14, CW-28
+        by2 = 96
+        for i,(name, lk) in enumerate(ranked[:n_show]):
+            is_top = (i == 0)
+            nc   = (230, 60, 20) if is_top else (100,100,100)
+            nm_s = f_hdr(12).render(f"#{i+1}  {name.upper()}", True, nc)
+            pt_s = f_hdr(12).render(f"{lk*100:.1f}%", True, nc)
+            surface.blit(nm_s, (bx2, by2))
+            surface.blit(pt_s, (bx2+bw2-pt_s.get_width(), by2))
+            by2 += 16
+            pygame.draw.rect(surface, (26,26,26), (bx2, by2, bw2, 10), border_radius=5)
+            fw2 = max(6, int(bw2 * lk))
+            bc2 = (230,60,20) if is_top else (55,55,55)
+            pygame.draw.rect(surface, bc2, (bx2, by2, fw2, 10), border_radius=5)
+            if is_top:
+                pygame.draw.rect(surface, (255,110,50), (bx2, by2, fw2, 3), border_radius=5)
+            by2 += 24
+
+    # 6. Gap acceptance card
+    GY = 68 + WL_H + 10
+    gap_lines = gap_logger.get_hud_lines() if gap_logger else ["No gap logger."]
+    GAP_H = 26 + len(gap_lines)*22 + 12
+    _ps_card(surface, RX, GY, CW, GAP_H)
+    _ps_card_hdr(surface, RX, GY, CW, "GAP ACCEPTANCE MODEL  (LOG-NORMAL)")
+    gy2 = GY + 30
+    for ln in gap_lines:
+        lt = f_body(11).render(ln, True, (135, 195, 135))
+        surface.blit(lt, (RX+14, gy2))
+        gy2 += 22
+
+    # 7. Environment card
+    EY = GY + GAP_H + 10
+    env_line = env_manager.get_summary_line() if env_manager else ""
+    _ps_card(surface, RX, EY, CW, 52)
+    _ps_card_hdr(surface, RX, EY, CW, "ENVIRONMENT")
+    ev = f_body(11).render(env_line, True, (135, 195, 155))
+    surface.blit(ev, (RX+14, EY+28))
+
+    # ── Footer (flashing) ─────────────────────────────────────────────────
+    if (pygame.time.get_ticks()//550) % 2 == 0:
+        ft = f_body(12).render(
+            "PRESS  [ESC]  OR  CLICK  ANYWHERE  TO  EXIT", True, (0, 170, 85))
+        surface.blit(ft, (SCREEN_WIDTH//2-ft.get_width()//2, SCREEN_HEIGHT-28))
 
 
 # ── Misc helpers ──────────────────────────────────────────────────────────
@@ -730,83 +828,7 @@ while running:
         draw_game_over(canvas)
 
     elif GAME_STATE == "POST_SESSION":
-        canvas.fill((10,15,15))
-        draw_radar_grid(canvas)
-        ts = font_title.render("SIMULATION DATA LOG", True, (0,255,127))
-        canvas.blit(ts, (SCREEN_WIDTH//2-ts.get_width()//2, 60))
-        if player and round_manager:
-            ta  = round_manager.wins + round_manager.losses
-            sr  = (round_manager.wins/ta*100) if ta > 0 else 0.0
-            t   = session_frames // FPS
-            m,s = t//60, t%60
-            for i, (line, tag) in enumerate([
-                (f"> Subject Profile.......... {player.name.upper()}", None),
-                (f"> Final Score.............. {round_manager.score}", "score"),
-                (f"> High Score............... {round_manager.high_score}", "hs"),
-                (f"> Total Time Elapsed....... {m:02d}:{s:02d}", None),
-                (f"> Kinetic Dashes Used...... {total_dashes_used}", None),
-                (f"> Wins..................... {round_manager.wins}", None),
-                (f"> Losses................... {round_manager.losses}", None),
-                (f"> Projected Survival Rate.. {sr:.1f}%", sr),
-            ]):
-                col = (C_GOLD if tag in ("score","hs") and
-                                 (tag=="score" or round_manager.new_highscore)
-                       else (0,255,127) if isinstance(tag,float) and tag >= 50
-                       else (255,50,50) if isinstance(tag,float)
-                       else (150,150,150) if tag=="hs"
-                       else (200,220,200))
-                canvas.blit(font_stats.render(line, True, col),
-                            (SCREEN_WIDTH//2-260, 155+i*42))
-
-        # Gap acceptance
-        if gap_logger:
-            gap_lines = gap_logger.get_hud_lines()
-            gy = 155 + 8*42 + 12
-            pygame.draw.line(canvas, (0,100,50),
-                             (SCREEN_WIDTH//2-260,gy),(SCREEN_WIDTH//2+260,gy),1)
-            gy += 10
-            canvas.blit(font_hud.render("> Gap Acceptance Model", True, (0,200,100)),
-                        (SCREEN_WIDTH//2-260, gy))
-            gy += 28
-            for ln in gap_lines:
-                canvas.blit(font_telemetry.render(ln, True, (160,210,160)),
-                            (SCREEN_WIDTH//2-260, gy))
-                gy += 22
-
-        # Environment
-        if env_manager:
-            gy_env  = 155 + 8*42 + 12 + 28 + 4*22 + 14
-            env_line= env_manager.get_summary_line()
-            pygame.draw.line(canvas, (0,80,50),
-                             (SCREEN_WIDTH//2-260,gy_env),(SCREEN_WIDTH//2+260,gy_env),1)
-            gy_env += 8
-            canvas.blit(font_hud.render("> Environment", True, (0,180,90)),
-                        (SCREEN_WIDTH//2-260, gy_env))
-            gy_env += 26
-            canvas.blit(font_telemetry.render(env_line, True, (140,200,155)),
-                        (SCREEN_WIDTH//2-260, gy_env))
-
-        # Win-likelihood comparison in POST_SESSION
-        ranked = comp.ranking()
-        if ranked:
-            gy_cmp = gy_env + 48 if env_manager else 155 + 8*42 + 60
-            pygame.draw.line(canvas, (0,80,50),
-                             (SCREEN_WIDTH//2-260,gy_cmp),(SCREEN_WIDTH//2+260,gy_cmp),1)
-            gy_cmp += 8
-            canvas.blit(font_hud.render("> Win Likelihood", True, (0,180,90)),
-                        (SCREEN_WIDTH//2-260, gy_cmp))
-            gy_cmp += 26
-            for i, (name, lk) in enumerate(ranked):
-                col = C_GOLD if i==0 else (160,210,160)
-                ln  = f"#{i+1}  {name.upper():<12}  {lk*100:.1f}%"
-                canvas.blit(font_telemetry.render(ln, True, col),
-                            (SCREEN_WIDTH//2-260, gy_cmp))
-                gy_cmp += 22
-
-        es = font_telemetry.render("PRESS [ESC] OR CLICK ANYWHERE TO TERMINATE",
-                                   True, (0,255,127))
-        if (pygame.time.get_ticks()//500)%2 == 0:
-            canvas.blit(es, (SCREEN_WIDTH//2-es.get_width()//2, SCREEN_HEIGHT-60))
+        draw_post_session(canvas)
 
     # Scale to window
     shake_surf = pygame.Surface((_LOGICAL_W, _LOGICAL_H))
