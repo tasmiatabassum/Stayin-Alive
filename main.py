@@ -42,7 +42,7 @@ C_BLACK = (0, 0, 0)
 
 # 2. Assets
 try:
-    start_bg = pygame.image.load("start.jpg")
+    start_bg = pygame.image.load("2.png")
     start_bg = pygame.transform.scale(start_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 except FileNotFoundError:
     print("FATAL ERROR: start.jpg missing.")
@@ -56,7 +56,7 @@ except FileNotFoundError:
     sys.exit()
 
 # 3. Hitboxes
-start_button_rect = pygame.Rect((SCREEN_WIDTH // 2) - 100, (SCREEN_HEIGHT // 2) + 50, 200, 80)
+start_button_rect = pygame.Rect((SCREEN_WIDTH//2)-100, (SCREEN_HEIGHT//2), 200, 80)
 btn_w, btn_h = 200, 70
 btn_y = (SCREEN_HEIGHT // 2) + 130
 badrul_btn_rect = pygame.Rect((SCREEN_WIDTH // 2) - btn_w - 20, btn_y, btn_w, btn_h)
