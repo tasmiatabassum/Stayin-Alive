@@ -70,10 +70,10 @@ class EnvironmentManager:
     # ── Public setters ───────────────────────────────────────────────────
     def set_round(self, r: int) -> None:
         """Call when a new round begins to nudge smog upward."""
-        self.current_round = r
-        # Each round adds a small persistent smog bump
-        self._smog = min(SMOG_MAX, self._smog + 0.04)
-
+        if r > self.current_round:
+            # Only add the 0.04 bump if the round has actually increased!
+            self._smog = min(SMOG_MAX, self._smog + 0.04)
+            self.current_round = r
     # ── Public read-only properties ──────────────────────────────────────
     @property
     def smog(self) -> float:
