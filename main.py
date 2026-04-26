@@ -9,6 +9,8 @@ from spawner import Spawner
 from characters import CHARACTERS
 from round_manager import RoundManager
 from logger import GapAcceptanceLogger
+from environment import EnvironmentManager
+from obstacles import ObstacleManager
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -77,6 +79,8 @@ road              = Road()
 spawner           = None
 player            = None
 gap_logger        = None
+env_manager       = None     # EnvironmentManager (weather/smog/rain)
+obstacle_manager  = ObstacleManager()   # potholes, vendors, NPCs
 session_frames    = 0
 total_dashes_used = 0
 lives             = 3
@@ -164,6 +168,20 @@ def draw_new_hs_flash(surface):
     s = font_popup.render("★ NEW HIGH SCORE! ★", True, C_GOLD)
     s.set_alpha(min(255, new_hs_timer * 6))
     surface.blit(s, (SCREEN_WIDTH//2 - s.get_width()//2, 140))
+
+def draw_stun_overlay(surface, stun_timer: int, max_stun: int = 65):
+    """Flash a 'STUNNED!' banner when the player hit a pothole."""
+    if stun_timer <= 0:
+        return
+    alpha = int(180 * (stun_timer / max_stun))
+    ov = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    ov.fill((180, 140, 0, min(alpha, 60)))
+    surface.blit(ov, (0, 0))
+    if stun_timer % 8 < 5:
+        msg = font_shake.render("STUNNED! (POTHOLE)", True, (255, 200, 0))
+        msg.set_alpha(alpha)
+        surface.blit(msg, (SCREEN_WIDTH//2 - msg.get_width()//2,
+                           SCREEN_HEIGHT//2 - msg.get_height()//2))
 
 # ── GAME OVER — start screen themed ─────────────────────────────────────
 def _pill(surface, rect, bg, label):
@@ -293,10 +311,11 @@ def draw_radar_grid(surface):
 def start_game(char_key):
     global player, round_manager, spawner, gap_logger
     global session_frames, total_dashes_used, lives, max_lives
-    global invincible_timer, new_hs_timer
+    global invincible_timer, new_hs_timer, env_manager
     player            = Pedestrian(CHARACTERS[char_key])
     round_manager     = RoundManager(char_key)
-    spawner           = Spawner(round_manager)
+    env_manager       = EnvironmentManager(SCREEN_WIDTH, SCREEN_HEIGHT)
+    spawner           = Spawner(round_manager, env_manager)
     gap_logger        = GapAcceptanceLogger(char_key, fps=FPS)
     lives             = CHARACTERS[char_key]["lives"]
     max_lives         = lives
@@ -305,6 +324,7 @@ def start_game(char_key):
     invincible_timer  = 0
     new_hs_timer      = 0
     popups.clear()
+    obstacle_manager.reset_for_round(1)
 
 GAME_STATE = "START"
 
@@ -356,10 +376,31 @@ while running:
         if invincible_timer > 0: invincible_timer -= 1
         if new_hs_timer     > 0: new_hs_timer     -= 1
 
+        # ── Environment update ───────────────────────────────────────────
+        if env_manager:
+            env_manager.set_round(round_manager.current_round)
+            env_manager.update()
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and player.current_dash_cooldown == 0:
             total_dashes_used += 1
-        player.move(keys)
+
+        # ── Player movement — skip if stunned by pothole ─────────────────
+        if obstacle_manager.player_is_stunned:
+            # Drain velocity quickly while stunned
+            player.vel_x *= 0.7
+            player.vel_y *= 0.7
+            player.rect.x = int(player.true_x)
+            player.rect.y = int(player.true_y)
+        else:
+            friction_mult = (env_manager.player_friction_mult
+                             if env_manager else 1.0)
+            player.move(keys, env_friction_mult=friction_mult)
+
+        # ── Obstacle update (potholes stun, vendors block) ───────────────
+        obstacle_manager.update(player.rect, spawner.vehicles)
+        obstacle_manager.resolve_vendor_collision(player)
+
         if gap_logger:
             gap_logger.check_and_log(player, spawner.vehicles,
                                      session_frames, round_manager.current_round)
@@ -373,6 +414,7 @@ while running:
             if round_manager.new_highscore: new_hs_timer = 40
             player.reset_position()
             spawner.vehicles.clear()
+            obstacle_manager.reset_for_round(round_manager.current_round)
 
         if invincible_timer == 0:
             for v in spawner.vehicles:
@@ -411,13 +453,18 @@ while running:
     elif GAME_STATE == "RUNNING" and player:
         road.update()
         road.draw(canvas)
+        obstacle_manager.draw(canvas)
         spawner.draw(canvas)
         if invincible_timer == 0 or (invincible_timer // 6) % 2 == 0:
             player.draw(canvas)
+        # Environmental overlays (smog gradient + rain streaks) on top
+        if env_manager:
+            env_manager.draw(canvas)
         draw_hud(canvas)
         update_and_draw_popups(canvas)
         draw_shake_message(canvas)
         draw_new_hs_flash(canvas)
+        draw_stun_overlay(canvas, obstacle_manager.stun_timer)
         hint = font_telemetry.render("[ESC] Pause", True, (80,120,80))
         canvas.blit(hint, (SCREEN_WIDTH - hint.get_width() - 12, 12))
 
@@ -478,6 +525,19 @@ while running:
                 canvas.blit(font_telemetry.render(ln, True, (160, 210, 160)),
                             (SCREEN_WIDTH//2-260, gy))
                 gy += 22
+
+        # ── Environment summary ──────────────────────────────────────────
+        if env_manager:
+            gy_env = 155 + 8 * 42 + 12 + 28 + 4 * 22 + 14
+            env_line = env_manager.get_summary_line()
+            pygame.draw.line(canvas, (0, 80, 50),
+                             (SCREEN_WIDTH//2-260, gy_env), (SCREEN_WIDTH//2+260, gy_env), 1)
+            gy_env += 8
+            canvas.blit(font_hud.render("> Environment", True, (0, 180, 90)),
+                        (SCREEN_WIDTH//2-260, gy_env))
+            gy_env += 26
+            canvas.blit(font_telemetry.render(env_line, True, (140, 200, 155)),
+                        (SCREEN_WIDTH//2-260, gy_env))
 
     screen.blit(canvas, (ox, oy))
     pygame.display.flip()

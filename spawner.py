@@ -2,68 +2,99 @@
 """
 Spawner — Traffic Arrival Model
 ================================
-Two stochastic upgrades over the original fixed-timer approach:
+Stochastic models in use:
 
-1.  Poisson Process arrivals
+1.  Non-Homogeneous Poisson Process (NHPP) arrivals
+    ------------------------------------------------
+    The arrival rate λ(t) now varies over the session to simulate
+    Dhaka's morning rush hour.  The intensity function is a mixture
+    of two Gaussian bumps (onset and peak) that produce a natural
+    ramp-up, plateau, then taper pattern.
+
+        λ(t) = λ_base(round) × I(t)
+
+    where I(t) is a normalised intensity curve in [0.25, 2.0] and
+    t is the session time in seconds.
+
+    This replaces the earlier homogeneous Poisson process while keeping
+    the Exponential inter-arrival draw as the per-step mechanism:
+
+        T_next ~ Exp(λ(t))
+
+2.  Bernoulli Lane Activation  (unchanged)
+    ----------------------------------------
+    Each lane independently activates per arrival event.
+
+3.  Rain friction multiplier
     -------------------------
-    Real traffic arrivals are memoryless and independent: a Poisson process
-    with rate λ (vehicles/frame).  The waiting time between successive
-    arrivals follows an Exponential distribution with mean 1/λ.  We draw
-    each inter-arrival gap with random.expovariate(λ), giving bursty,
-    realistic spacing — sometimes three cars arrive close together,
-    sometimes a long gap opens up.
-
-        T_next ~ Exp(λ)    where  λ = 1 / get_spawn_frequency()
-
-2.  Bernoulli Lane Activation
-    --------------------------
-    At each arrival event, every lane independently "activates" with its
-    own probability p_lane (from round_manager.get_lane_activation_probs).
-    This models stochastic congestion onset: near-lane traffic is always
-    present early, while far and middle lanes gradually become active.
-    Multiple lanes can spawn in a single arrival event, reflecting
-    correlated bursts seen in real urban traffic.
+    When EnvironmentManager reports rain, the NaSch p_slow for every
+    spawned vehicle is scaled up via vehicle_p_slow_mult.  This is
+    stored on each Vehicle as p_slow_extra and read in vehicle._nasch_step.
 """
 
 import random
+import math
 from vehicle import Vehicle
 from config import *
 from round_manager import weighted_choice
 
 
-class Spawner:
-    def __init__(self, round_manager):
-        self.vehicles    = []
-        self.rm          = round_manager
-        self._frame      = 0
-        # Draw the first inter-arrival time immediately
-        self._next_spawn = self._sample_interarrival()
+# ── NHPP intensity curve ────────────────────────────────────────────────
+# Two Gaussian peaks centred at t=90s (early rush) and t=240s (full rush)
+_RUSH_PEAKS  = [(90,  60, 1.2),   # (centre_s, sigma_s, amplitude)
+                (240, 90, 2.0)]
+_BASE_I      = 0.25                # minimum intensity (off-peak)
 
-    # ── Poisson inter-arrival time ──────────────────────────────────────
+def _nhpp_intensity(t_seconds: float) -> float:
+    """
+    Normalised intensity I(t) ∈ [_BASE_I, ~2.0].
+    Peaks model morning rush hour onset and peak congestion.
+    """
+    val = _BASE_I
+    for mu, sigma, amp in _RUSH_PEAKS:
+        val += amp * math.exp(-0.5 * ((t_seconds - mu) / sigma) ** 2)
+    return val
+
+
+class Spawner:
+    def __init__(self, round_manager, env_manager=None):
+        self.vehicles      = []
+        self.rm            = round_manager
+        self._env          = env_manager   # EnvironmentManager or None
+        self._frame        = 0
+        self._session_time = 0.0           # seconds since game start
+        self._fps          = FPS
+        self._next_spawn   = self._sample_interarrival()
+
+    # ── NHPP inter-arrival time ─────────────────────────────────────────
     def _sample_interarrival(self) -> float:
         """
-        Sample the waiting time until the next vehicle arrival event.
-        Uses the Exponential distribution — the waiting-time distribution
-        of a homogeneous Poisson process.
-
-            T ~ Exp(λ),  E[T] = 1/λ = get_spawn_frequency() frames
+        Draw T ~ Exp(λ(t)) where λ(t) incorporates the rush-hour curve.
+        Mean inter-arrival = base_mean / I(t).
         """
-        mean_frames = self.rm.get_spawn_frequency()   # scalar > 0
-        lam         = 1.0 / mean_frames               # rate parameter
-        return random.expovariate(lam)                # frames until next event
+        base_mean = self.rm.get_spawn_frequency()      # frames (from round)
+        intensity  = _nhpp_intensity(self._session_time)
+        mean_frames = max(8.0, base_mean / intensity)  # clamp to prevent collapse
+        lam         = 1.0 / mean_frames
+        return random.expovariate(lam)
 
     # ── Main update ─────────────────────────────────────────────────────
     def update(self):
-        self._frame += 1
+        self._frame         += 1
+        self._session_time   = self._frame / self._fps
 
         if self._frame >= self._next_spawn:
             self.attempt_spawn()
             self._frame      = 0
-            self._next_spawn = self._sample_interarrival()   # re-draw gap
+            self._next_spawn = self._sample_interarrival()
+
+        # Rain multiplier for NaSch p_slow
+        p_slow_mult = (self._env.vehicle_p_slow_mult
+                       if self._env is not None else 1.0)
 
         multiplier = self.rm.get_traffic_speed_multiplier()
         for v in self.vehicles:
-            v.update(self.vehicles, multiplier)
+            v.update(self.vehicles, multiplier, p_slow_mult)
 
         # Cull off-screen vehicles
         self.vehicles = [v for v in self.vehicles
@@ -71,48 +102,32 @@ class Spawner:
 
     # ── Bernoulli lane activation ────────────────────────────────────────
     def attempt_spawn(self):
-        """
-        For each lane, independently flip a Bernoulli coin with lane-specific
-        probability p_lane (from round_manager).  Each active lane spawns one
-        vehicle, so 0–3 vehicles can appear per arrival event.
-
-        Lane layout (lane_id, y-constant, default direction):
-            lane 3 → NEAR_LANE_Y,   always leftward
-            lane 2 → MIDDLE_LANE_Y, bidirectional
-            lane 1 → FAR_LANE_Y,    always rightward
-        """
-        lane_probs = self.rm.get_lane_activation_probs()  # [near_p, middle_p, far_p]
+        lane_probs = self.rm.get_lane_activation_probs()
 
         lane_defs = [
-            (3, NEAR_LANE_Y,    True),   # (lane_id, y, go_left)
-            (2, MIDDLE_LANE_Y,  None),   # direction determined by bidir probability
+            (3, NEAR_LANE_Y,    True),
+            (2, MIDDLE_LANE_Y,  None),
             (1, FAR_LANE_Y,     False),
         ]
 
         for (lane_id, target_y, fixed_left), p_lane in zip(lane_defs, lane_probs):
-
-            # ── Bernoulli trial ──────────────────────────────────────────
             if random.random() > p_lane:
-                continue   # this lane is not active this event
+                continue
 
             sub_lane = random.choice([0, 1])
 
-            # Direction
-            if fixed_left is None:           # middle lane: probabilistic
-                bidir = self.rm.get_middle_bidirectional_prob()
+            if fixed_left is None:
+                bidir   = self.rm.get_middle_bidirectional_prob()
                 go_left = random.random() < bidir
             else:
                 go_left = fixed_left
 
-            # ── Weighted categorical: vehicle type ───────────────────────
-            tw     = self.rm.get_vehicle_weights()
-            vtype  = weighted_choice(list(tw.keys()), list(tw.values()))
+            tw    = self.rm.get_vehicle_weights()
+            vtype = weighted_choice(list(tw.keys()), list(tw.values()))
 
-            # ── Dynamic headway guard ────────────────────────────────────
             spawn_gap = self.rm.get_spawn_gap()
 
             if self.is_lane_clear(target_y, sub_lane, go_left, spawn_gap):
-                # Lane-dependent truncated-normal speed
                 speed = self.rm.get_speed_sample(vtype, lane_id)
                 self.vehicles.append(
                     Vehicle(target_y, go_left, sub_lane,

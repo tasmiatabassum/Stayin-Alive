@@ -29,7 +29,12 @@ class Pedestrian:
         # Bottom clamp: keep player on the near footpath (not into compound)
         self._bottom_clamp = COMPOUND_Y - character_data["height"]
 
-    def move(self, keys):
+    def move(self, keys, env_friction_mult: float = 1.0):
+        """
+        env_friction_mult: multiplier on friction from EnvironmentManager.
+        Values < 1.0 (rain) make the surface more slippery — friction approaches
+        1.0 and the player slides further before stopping.
+        """
         if self.current_dash_cooldown > 0:
             self.current_dash_cooldown -= 1
 
@@ -52,8 +57,12 @@ class Pedestrian:
             self.vel_x = max(-self.max_speed, min(self.max_speed, self.vel_x))
             self.vel_y = max(-self.max_speed, min(self.max_speed, self.vel_y))
 
-        self.vel_x *= self.friction
-        self.vel_y *= self.friction
+        # env_friction_mult < 1 → wet surface → friction moves toward 1.0
+        # (less damping = more sliding).  Clamp so it never exceeds 0.99.
+        effective_friction = min(0.99,
+            1.0 - (1.0 - self.friction) * env_friction_mult)
+        self.vel_x *= effective_friction
+        self.vel_y *= effective_friction
 
         self.true_x += self.vel_x
         self.true_y += self.vel_y

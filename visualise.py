@@ -138,19 +138,19 @@ for session in log_data:
 #  Figure layout
 # ════════════════════════════════════════════════════════════════════════
 
-fig = plt.figure(figsize=(20, 13), facecolor=BG)
+fig = plt.figure(figsize=(26, 17), facecolor=BG)
 fig.suptitle(
-    "Stayin' Alive in Boardbazar  ·  Stochastic Traffic Simulation Models",
+    "Stayin' Alive in Boardbazar  ·  Stochastic Traffic & Environment Models",
     color=WHITE, fontsize=16, fontweight="bold", y=0.985,
     fontfamily="monospace"
 )
 
-gs = gridspec.GridSpec(2, 3, figure=fig,
+gs = gridspec.GridSpec(2, 4, figure=fig,
                        hspace=0.44, wspace=0.30,
-                       left=0.06, right=0.97,
+                       left=0.05, right=0.97,
                        top=0.92,  bottom=0.07)
 
-axes = [fig.add_subplot(gs[r, c]) for r in range(2) for c in range(3)]
+axes = [fig.add_subplot(gs[r, c]) for r in range(2) for c in range(4)]
 
 
 def style(ax, title, xlabel, ylabel):
@@ -209,24 +209,43 @@ ax.legend(handles=leg_handles, facecolor=PANEL, edgecolor=GRID,
           labelcolor=WHITE, fontsize=8, loc="upper right")
 
 
-# ── Panel B  Poisson Arrivals ────────────────────────────────────────────
+# ── Panel B  Non-Homogeneous Poisson Arrivals (NHPP Rush Hour) ──────────
 
 ax = axes[1]
-style(ax, "B   Poisson Arrival Process  (Exponential inter-arrival)",
-      "Frames until next vehicle", "Probability density")
+style(ax, "B   NHPP Rush-Hour  (λ(t) = λ_base × I(t))",
+      "Session time (seconds)", "Arrival rate λ (vehicles / frame)")
 
-x_fr = np.linspace(0, 110, 400)
+_RUSH_PEAKS = [(90, 60, 1.2), (240, 90, 2.0)]
+_BASE_I      = 0.25
+
+def nhpp_intensity(t):
+    import math as _math
+    v = _BASE_I
+    for mu, sigma, amp in _RUSH_PEAKS:
+        v += amp * _math.exp(-0.5 * ((t - mu) / sigma) ** 2)
+    return v
+
+t_arr = np.linspace(0, 360, 600)
 for i, r in enumerate([1, 3, 5, 7, 9]):
-    lam = 1.0 / spawn_freq(r)
-    pdf = expon.pdf(x_fr, scale=spawn_freq(r))
+    base_mean = max(15.0, 40.0 - r * 3.0)
+    lam_base  = 1.0 / base_mean
+    lam_t     = np.array([lam_base * nhpp_intensity(t) for t in t_arr])
     col = ROUND_PALETTE[i]
-    ax.plot(x_fr, pdf, color=col, lw=2.0,
-            label=f"Round {r}  E[T]={spawn_freq(r):.0f} fr")
-    ax.fill_between(x_fr, pdf, alpha=0.07, color=col)
+    ax.plot(t_arr, lam_t, color=col, lw=2.0,
+            label=f"Round {r}  (λ_base={lam_base:.3f})")
+    ax.fill_between(t_arr, lam_t, alpha=0.06, color=col)
 
-ax.set_xlim(0, 100);  ax.set_ylim(bottom=0)
+# Annotate peak zones
+ax.axvspan(60, 120,  alpha=0.07, color=C_NEAR,  label="Early rush")
+ax.axvspan(180, 300, alpha=0.07, color=C_FAR,   label="Peak rush")
+ax.text(90,  ax.get_ylim()[1]*0.92 if ax.get_ylim()[1] > 0 else 0.06, "early\nrush",
+        color=C_NEAR, fontsize=7, ha="center")
+ax.text(240, ax.get_ylim()[1]*0.92 if ax.get_ylim()[1] > 0 else 0.06, "peak\nrush",
+        color=C_FAR,  fontsize=7, ha="center")
+
+ax.set_xlim(0, 360);  ax.set_ylim(bottom=0)
 ax.legend(facecolor=PANEL, edgecolor=GRID, labelcolor=WHITE,
-          fontsize=8, loc="upper right")
+          fontsize=7.5, loc="upper right")
 
 
 # ── Panel C  Lane-Dependent Speed KDE ───────────────────────────────────
@@ -331,6 +350,64 @@ ax.text(2, 97, f"p_slow=0.25  ·  {38} vehicles  ·  v_max=5  ·  periodic bound
         color=DIM, fontsize=7)
 
 ax.set_ylabel("← earlier      Time step      later →", color=DIM, fontsize=8)
+
+
+# ── Panel G  Smog / Visibility — Mean-Reverting Gaussian Walk ───────────
+
+ax = axes[6]
+style(ax, "G   Environmental Smog  (Mean-Reverting Gaussian Walk)",
+      "Session frame", "Smog level")
+
+SMOG_MEAN_TARGET = 0.35
+SMOG_DRIFT_STD   = 0.006
+SMOG_MEAN_PULL   = 0.003
+RAIN_THRESHOLD   = 0.55
+
+np.random.seed(7)
+for r, col in zip([1, 5, 10], [C_FAR, C_MID, C_NEAR]):
+    s = SMOG_MEAN_TARGET
+    frames, vals = [], []
+    round_push = (r - 1) * 0.0003
+    for fr in range(1200):
+        pull  = SMOG_MEAN_PULL * (SMOG_MEAN_TARGET - s)
+        drift = np.random.normal(0, SMOG_DRIFT_STD)
+        s     = np.clip(s + pull + drift + round_push, 0, 1)
+        frames.append(fr)
+        vals.append(s)
+    ax.plot(frames, vals, color=col, lw=1.4, alpha=0.85, label=f"Round {r}")
+
+ax.axhline(RAIN_THRESHOLD, color=C_MID, lw=1.2, linestyle="--")
+ax.text(1210, RAIN_THRESHOLD + 0.02, "Rain\nthreshold", color=C_MID, fontsize=7.5)
+ax.axhline(SMOG_MEAN_TARGET, color=DIM, lw=0.8, linestyle=":")
+ax.text(1210, SMOG_MEAN_TARGET + 0.02, "μ target", color=DIM, fontsize=7.5)
+
+ax.fill_between(range(1200),
+    [RAIN_THRESHOLD]*1200, [1.0]*1200, alpha=0.06, color=C_MID, label="Rain zone")
+ax.set_xlim(0, 1200);  ax.set_ylim(0, 1)
+ax.legend(facecolor=PANEL, edgecolor=GRID, labelcolor=WHITE, fontsize=8)
+
+
+# ── Panel H  Rain Effect on NaSch p_slow ────────────────────────────────
+
+ax = axes[7]
+style(ax, "H   Rain → NaSch p_slow Scaling  (Phantom Jam Amplification)",
+      "Rain intensity (0=dry → 1=heavy)", "Effective p_slow")
+
+rain_int = np.linspace(0, 1, 300)
+p_slow_mult = 1.0 + 0.60 * rain_int
+
+vtype_base = {"car": 0.10, "motorcycle": 0.08,
+              "bus": 0.15,  "truck": 0.18, "cng": 0.22}
+v_cols_h   = [C_FAR, C_NEAR, C_MID, "#c77dff", "#ffd93d"]
+
+for (vt, base_p), col in zip(vtype_base.items(), v_cols_h):
+    effective = np.clip(base_p * p_slow_mult, 0, 0.75)
+    ax.plot(rain_int, effective, color=col, lw=2.2, label=vt.capitalize())
+
+ax.axhline(0.25, color=DIM, lw=1.0, linestyle="--", alpha=0.5)
+ax.text(1.02, 0.25, "NaSch\nlit. upper", color=DIM, fontsize=7)
+ax.set_xlim(0, 1);  ax.set_ylim(0, 0.80)
+ax.legend(facecolor=PANEL, edgecolor=GRID, labelcolor=WHITE, fontsize=8)
 
 
 # ════════════════════════════════════════════════════════════════════════

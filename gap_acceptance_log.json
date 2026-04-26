@@ -951,5 +951,544 @@
       "lognormal_mu": -0.8891,
       "lognormal_sigma": 0.9351
     }
+  },
+  {
+    "session_time": "2026-04-26T13:55:21.078741",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 176,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.091,
+        "accepted": true
+      },
+      {
+        "frame": 236,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.29,
+        "accepted": true
+      },
+      {
+        "frame": 273,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 399,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 412,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 464,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 993,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.059,
+        "accepted": true
+      },
+      {
+        "frame": 1009,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1050,
+        "round": 5,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1140,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.589,
+        "accepted": true
+      },
+      {
+        "frame": 1170,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1268,
+        "round": 6,
+        "from_zone": "far",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 1449,
+        "round": 6,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.446,
+        "accepted": true
+      },
+      {
+        "frame": 1454,
+        "round": 6,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.331,
+        "accepted": true
+      },
+      {
+        "frame": 1473,
+        "round": 7,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 6,
+      "mean_gap_s": 0.634,
+      "std_gap_s": 0.522,
+      "min_gap_s": 0.091,
+      "max_gap_s": 1.589,
+      "lognormal_mu": -0.8379,
+      "lognormal_sigma": 0.9271
+    }
+  },
+  {
+    "session_time": "2026-04-26T13:55:40.108020",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 128,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.255,
+        "accepted": true
+      },
+      {
+        "frame": 144,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 237,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.511,
+        "accepted": true
+      },
+      {
+        "frame": 246,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 2.148,
+        "accepted": true
+      },
+      {
+        "frame": 268,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 543,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 580,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 1.826,
+        "accepted": true
+      },
+      {
+        "frame": 587,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 614,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 4.36,
+        "accepted": true
+      },
+      {
+        "frame": 648,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 4.267,
+        "accepted": true
+      },
+      {
+        "frame": 704,
+        "round": 5,
+        "from_zone": "far",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 792,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 6,
+      "mean_gap_s": 2.228,
+      "std_gap_s": 1.618,
+      "min_gap_s": 0.255,
+      "max_gap_s": 4.36,
+      "lognormal_mu": 0.3754,
+      "lognormal_sigma": 1.0562
+    }
+  },
+  {
+    "session_time": "2026-04-26T13:56:42.313605",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 179,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.067,
+        "accepted": true
+      },
+      {
+        "frame": 180,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 299,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 336,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 363,
+        "round": 3,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 750,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 795,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 837,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 891,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 963,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 1,
+      "mean_gap_s": 0.067,
+      "std_gap_s": 0.0,
+      "min_gap_s": 0.067,
+      "max_gap_s": 0.067,
+      "lognormal_mu": -2.7031,
+      "lognormal_sigma": null
+    }
+  },
+  {
+    "session_time": "2026-04-26T13:57:20.787059",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 76,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 1.16,
+        "accepted": true
+      },
+      {
+        "frame": 107,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.745,
+        "accepted": true
+      },
+      {
+        "frame": 174,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 254,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 390,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 432,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.724,
+        "accepted": true
+      },
+      {
+        "frame": 462,
+        "round": 3,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 2.344,
+        "accepted": true
+      },
+      {
+        "frame": 497,
+        "round": 4,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 529,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.878,
+        "accepted": true
+      },
+      {
+        "frame": 644,
+        "round": 5,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 675,
+        "round": 5,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.512,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 6,
+      "mean_gap_s": 1.06,
+      "std_gap_s": 0.606,
+      "min_gap_s": 0.512,
+      "max_gap_s": 2.344,
+      "lognormal_mu": -0.0694,
+      "lognormal_sigma": 0.4787
+    }
+  },
+  {
+    "session_time": "2026-04-26T13:57:33.841661",
+    "character": "Badrul",
+    "events": [
+      {
+        "frame": 88,
+        "round": 1,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 2.312,
+        "accepted": true
+      },
+      {
+        "frame": 109,
+        "round": 1,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.91,
+        "accepted": true
+      },
+      {
+        "frame": 131,
+        "round": 2,
+        "from_zone": "safe_zone",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 206,
+        "round": 2,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 5.176,
+        "accepted": true
+      },
+      {
+        "frame": 227,
+        "round": 2,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.379,
+        "accepted": true
+      },
+      {
+        "frame": 244,
+        "round": 3,
+        "from_zone": "far",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 269,
+        "round": 3,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 371,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "near",
+        "time_gap_s": 99.9,
+        "accepted": true
+      },
+      {
+        "frame": 406,
+        "round": 4,
+        "from_zone": "near",
+        "to_lane": "middle",
+        "time_gap_s": 0.528,
+        "accepted": true
+      },
+      {
+        "frame": 432,
+        "round": 4,
+        "from_zone": "middle",
+        "to_lane": "far",
+        "time_gap_s": 0.12,
+        "accepted": true
+      }
+    ],
+    "summary": {
+      "n": 6,
+      "mean_gap_s": 1.571,
+      "std_gap_s": 1.76,
+      "min_gap_s": 0.12,
+      "max_gap_s": 5.176,
+      "lognormal_mu": -0.2236,
+      "lognormal_sigma": 1.222
+    }
   }
 ]

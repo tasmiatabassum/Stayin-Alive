@@ -82,18 +82,24 @@ class Vehicle:
         self.p_slow = NASCH_P_SLOW.get(self.vtype, 0.10)
 
     # ── Update ──────────────────────────────────────────────────────────
-    def update(self, all_vehicles, speed_multiplier: float = 1.0):
+    def update(self, all_vehicles, speed_multiplier: float = 1.0,
+               p_slow_mult: float = 1.0):
+        """
+        p_slow_mult: environmental scaling of NaSch randomisation probability.
+        Rain sets this > 1 (more phantom jams), clear weather = 1.0.
+        """
         self.switch_cooldown = max(0, self.switch_cooldown - 1)
 
         # Head-on evasion only needed in the chaotic middle lane
         if self.lane_y == MIDDLE_LANE_Y:
             self.check_head_on(all_vehicles)
 
-        # Nagel-Schreckenberg 4-step rule replaces the old maintain_distance()
-        self._nasch_step(all_vehicles, speed_multiplier)
+        # Nagel-Schreckenberg 4-step rule
+        self._nasch_step(all_vehicles, speed_multiplier, p_slow_mult)
 
     # ── Nagel-Schreckenberg Cellular Automaton ───────────────────────────
-    def _nasch_step(self, all_vehicles, speed_multiplier: float) -> None:
+    def _nasch_step(self, all_vehicles, speed_multiplier: float,
+                    p_slow_mult: float = 1.0) -> None:
         """
         Four-step NaSch update (Nagel & Schreckenberg 1992):
 
@@ -102,8 +108,8 @@ class Vehicle:
           3. Randomise   : v ← max(v - a,  0)  with prob p_slow  [phantom jams]
           4. Move        : x ← x + v
 
-        All quantities in pixels/frame so no unit conversion is needed.
-        The 'look_ahead' divisor converts pixel distance → speed headroom.
+        p_slow_mult scales the randomisation probability; rain sets it > 1.0
+        to produce more frequent phantom jams on wet roads.
         """
         v_max  = abs(self.base_speed) * speed_multiplier
         accel  = NASCH_ACCEL
@@ -116,13 +122,12 @@ class Vehicle:
         # ── Step 2 · Brake ──────────────────────────────────────────────
         gap = self._gap_to_ahead(all_vehicles)
         if gap is not None:
-            # Clamp speed so the vehicle won't close the gap in <8 frames.
-            # Factor of 8 chosen empirically to prevent bumping at game speeds.
             safe_spd = max(0.0, (gap - self.w * 0.25) / 8.0)
             spd      = min(spd, safe_spd)
 
         # ── Step 3 · Stochastic deceleration (phantom traffic jams) ─────
-        if random.random() < self.p_slow:
+        effective_p_slow = min(0.75, self.p_slow * p_slow_mult)
+        if random.random() < effective_p_slow:
             spd = max(0.0, spd - accel)
 
         # ── Step 4 · Move ───────────────────────────────────────────────
